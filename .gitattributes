@@ -1,0 +1,6 @@
+# CAD exchanges are generated artifacts; avoid huge textual diffs.
+*.FCStd binary
+*.stl binary
+*.step binary
+*.obj.gz binary
+*.png binary

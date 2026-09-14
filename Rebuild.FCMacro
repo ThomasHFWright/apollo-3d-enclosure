@@ -1,0 +1,23 @@
+"""Edit Parameters in the open mount document, then run this macro to rebuild."""
+from pathlib import Path
+import runpy
+import FreeCAD as App
+import FreeCADGui as Gui
+from PySide import QtWidgets
+
+window = Gui.getMainWindow()
+window.statusBar().showMessage("Rebuilding Apollo mount...")
+Gui.updateGui()
+try:
+    runpy.run_path(str(Path(__file__).with_name("build_mount.py")),run_name="__main__")
+except Exception as error:
+    window.statusBar().showMessage("Apollo rebuild failed — see error")
+    App.Console.PrintError(f"Apollo rebuild failed: {error}\n")
+    QtWidgets.QMessageBox.critical(window, "Apollo rebuild failed",
+        f"{error}\n\nRebuild did not complete. Do not print the previous exports with these settings.")
+    raise
+else:
+    cable_status = f"cable entry depth {App.ActiveDocument.Parameters.ActualCableEntryDepth:g} mm" if App.ActiveDocument.Parameters.CableEnabled else "cable disabled"
+    message = f"Apollo rebuilt: rear chamber {App.ActiveDocument.Parameters.RearChamberDepth:g} mm; {cable_status} — exports in output/custom"
+    window.statusBar().showMessage(message)
+    App.Console.PrintMessage(message + "\n")

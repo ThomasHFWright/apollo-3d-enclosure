@@ -1,0 +1,18 @@
+"""Run on an opened strength.FCStd to show stresses and configure the solver."""
+from pathlib import Path
+import sys
+import importlib
+import FreeCAD as App
+import FreeCADGui as Gui
+
+root = Path(__file__).resolve().parent
+sys.path.insert(0, str(root))
+import test_strength
+importlib.reload(test_strength)
+doc = App.ActiveDocument
+if not doc or not doc.getObject('Analysis') or not doc.getObject('Assumptions'):
+    raise ValueError('Open an output/strength/.../strength.FCStd analysis first')
+App.ParamGet('User parameter:BaseApp/Preferences/Mod/Fem/Gmsh').SetString('gmshBinaryPath', '/usr/bin/gmsh')
+App.ParamGet('User parameter:BaseApp/Preferences/Mod/Fem/Ccx').SetString('ccxBinaryPath', str(root/'.tools/fem/bin/ccx'))
+test_strength.show_results(doc)
+Gui.getMainWindow().statusBar().showMessage('Undeformed stress map: pipeline legend in Pa (divide by 1,000,000 for MPa); displacement field in metres. See the report for mm/MPa values.', 20000)

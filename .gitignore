@@ -1,0 +1,21 @@
+# Local applications, credentials, caches and development experiments
+.tools/
+backups/
+__pycache__/
+*.pyc
+*.log
+.env
+.env.*
+*.env
+*.FCStd1
+*.FCStd[0-9]
+*.FCBak
+.*.swp
+result.json
+# Track only intentionally selected preset artifacts with git add -f.
+output/
+# Original mesh is distributed losslessly compressed.
+r-pro-1-pcb.obj
+pcb-reference-*.png
+# Only the official front-case STEP is needed for the comparison test.
+apollo-automation-r-pro-1-dual-mmwave-multisensor-with-optional-co2-addon-model_files/
