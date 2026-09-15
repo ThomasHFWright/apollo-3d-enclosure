@@ -191,7 +191,9 @@ def check_contact_only_openings():
 
 
 def check_cable_disabled():
-    p=m.defaults(CableEnabled=False)
+    p=m.defaults()
+    assert p["CableEnabled"] is False
+    assert p["RearChamberDepth"] == 10.
     off=m.build(p)
     bad=m.defaults(CableEnabled=False,AutoCableRoute=False,MinBendRadius=1e6,
                    CableHoleWidth=-1.,CableHoleHeight=0.,CableHoleRadius=100.,
@@ -280,18 +282,19 @@ if __name__ == "__main__":
     check_fasteners()
     check_cable_disabled()
     check_contact_only_openings()
-    standard=m.build(m.defaults())
+    # Routing regressions explicitly enable the now optional cable.
+    standard=m.build(m.defaults(CableEnabled=True))
     # The old finger guard left a triangular tab across this top-panel vent,
     # even though no finger pocket intersects this panel.
     tab=m.Part.makeSphere(.08,standard['pose'].multVec(m.V(10.,33.9,-19.5)))
     assert tab.common(standard['body']).Volume<.00001, 'Stray finger-guard tab in flat top vent'
     check_cable_rim(standard)
     print('PASS flat neighbouring vent has no stray pocket tab',flush=True)
-    flat=m.build(m.defaults(RearChamberDepth=67.3))
+    flat=m.build(m.defaults(CableEnabled=True,RearChamberDepth=67.3))
     assert m.defaults()["PlugLength"] == 15.
     start=flat["pose"].inverse().multVec(flat["path"].Vertexes[0].Point)
     assert abs(start.z + m.defaults()["RearHeight"] + 15.) < .001
-    no_guide=m.build(m.defaults(RearChamberDepth=67.3,CableGuide=False))
+    no_guide=m.build(m.defaults(CableEnabled=True,RearChamberDepth=67.3,CableGuide=False))
     assert abs(flat["body"].Volume-no_guide["body"].Volume) < .001
     assert "CableGuide" not in m.defaults(CableGuide=True)
     assert flat["cable_preview"].isValid()
@@ -310,13 +313,13 @@ if __name__ == "__main__":
     check_cable_rim(flat)
     assert flat["rim"].Volume > 0 and no_guide["rim"].Volume > 0
     assert flat["rim"].cut(flat["body"]).Volume < .01
-    sharp=m.build(m.defaults(RearChamberDepth=67.3,CornerRadius=0.))
+    sharp=m.build(m.defaults(CableEnabled=True,RearChamberDepth=67.3,CornerRadius=0.))
     assert sharp["body"].isValid()
     assert sharp["lid"].Volume > flat["lid"].Volume
     assert any(isinstance(e.Curve,m.Part.Circle) and abs(e.Curve.Radius-2.5)<.001 for e in flat["lid"].Edges)
     assert abs(flat["radius"]-no_guide["radius"]) < .001
     print("PASS display-only cable, legacy guide flag ignored, unobstructed passage",flush=True)
-    short=m.build(m.defaults(BoardDistance=30.))
+    short=m.build(m.defaults(CableEnabled=True,BoardDistance=30.))
     assert short["actual_entry_depth"] < 0
     assert short["body"].Volume > 0
     for changes in ({},{"RearHeight":20.},{"Pitch":15.},{"Yaw":20.,"Pitch":10.},{"Yaw":20.,"Pitch":20.}):
@@ -326,7 +329,7 @@ if __name__ == "__main__":
         assert abs(r["pose"].multVec(m.V(0,0,neck)).z-r["rear_front"]-30.) < .001
     print("PASS 30 mm chamber stays 30 despite module heights/angles",flush=True)
     for corner in (False,True):
-        angled=m.build(m.defaults(Yaw=30.,Pitch=30.,MinBendRadius=9.,Corner=corner))
+        angled=m.build(m.defaults(CableEnabled=True,Yaw=30.,Pitch=30.,MinBendRadius=9.,Corner=corner))
         angled["body"].check(True)
         angled["lid"].check(True)
         assert max(angled['hood_end_exposure'])<.001
@@ -339,7 +342,7 @@ if __name__ == "__main__":
         assert angled["rim"].cut(angled["body"]).Volume < .01
         with TemporaryDirectory(prefix="apollo-export-test-") as folder:
             doc=m.App.newDocument("ExportCheck")
-            m.parameters(doc,m.defaults(Yaw=30.,Pitch=30.,MinBendRadius=9.,Corner=corner))
+            m.parameters(doc,m.defaults(CableEnabled=True,Yaw=30.,Pitch=30.,MinBendRadius=9.,Corner=corner))
             m.export(doc,m.read_parameters(doc),angled,Path(folder))
             assert {f.name for f in Path(folder).iterdir()} == {
                 'body.stl', 'lid.stl', 'body.step', 'lid.step',
@@ -370,20 +373,20 @@ if __name__ == "__main__":
         dict(Corner=True,CornerAngle=110.,CableGuide=False),
         dict(CableEntryX=10.,CableEntryY=-70.,CableEntryDepth=25.,CableElevation=-10.,BoardDistance=120.,CableTangentLength=40.),
     ):
-        result=m.build(m.defaults(**changes))
-        check_head_recesses(m.defaults(**changes),result)
-        check_nut_hoods(m.defaults(**changes),result)
+        result=m.build(m.defaults(CableEnabled=True,**changes))
+        check_head_recesses(m.defaults(CableEnabled=True,**changes),result)
+        check_nut_hoods(m.defaults(CableEnabled=True,**changes),result)
         check_cable_rim(result)
         if changes==dict(CableEntryY=-8.907,CableEntryDepth=-30.):
             assert result['cable_cut'].Volume<.001 and result['rim'].Volume<.001, 'Clear rear exit must not create a hole or rim'
         assert abs(result['wall_width']-70.)<.001
         assert abs(result['wall_height']+20.-108.)<.001
-        assert min(result['support_lengths'])>=m.defaults(**changes)['NutAccessDepth']
+        assert min(result['support_lengths'])>=m.defaults(CableEnabled=True,**changes)['NutAccessDepth']
         assert max(result['hood_end_exposure'])<.001
         if changes.get("Yaw") in (20.,30.,40.,90.,-90.):
             result["body"].check(True)
             result["lid"].check(True)
-        assert result["radius"] >= m.defaults(**changes)["MinBendRadius"]
+        assert result["radius"] >= m.defaults(CableEnabled=True,**changes)["MinBendRadius"]
         assert result["body"].common(result["cable_cut"]).Volume < .01
         assert result["rim"].cut(result["body"]).Volume < .01
         assert abs(result['pose'].Base.x-m.W/2*m.math.sin(m.math.radians(changes.get('Yaw',0))))<.001
@@ -407,8 +410,8 @@ if __name__ == "__main__":
     assert abs(m.board_distance(m.read_parameters(doc))-(30+22.7*m.math.cos(m.math.radians(15)))) < .001
     m.App.closeDocument(doc.Name)
     print("PASS legacy file distance migration and new single depth input",flush=True)
-    rejected(MinBendRadius=200.)
-    rejected(BoardDistance=20.)
+    rejected(CableEnabled=True,MinBendRadius=200.)
+    rejected(CableEnabled=True,BoardDistance=20.)
     rejected(EdgeBite=4.)
     rejected(RegistrationGap=1.)
     # Depth drives the shape; automatic wall clearance can make even this short
@@ -417,10 +420,10 @@ if __name__ == "__main__":
     assert tiny['pose'].Base.z-tiny['rear_front']>m.board_distance(m.defaults(RearChamberDepth=1.,Yaw=40.))
     assert tiny['body'].common(tiny['reserved']).Volume<.01
     print('PASS short chamber uses automatic wall clearance',flush=True)
-    rejected(RearChamberDepth=30.,AutoCableRoute=False)
+    rejected(CableEnabled=True,RearChamberDepth=30.,AutoCableRoute=False)
     rejected(CornerRadius=5.)
     rejected(SideVentOffset=-1.)
     rejected(BlackReliefStartY=10.,BlackReliefEndY=5.)
-    rejected(CableHoleWidth=12.)
-    rejected(CableHoleRadius=10.)
-    rejected(CableHoleWidth=17.,CableHoleHeight=18.,CableHoleRadius=3.)
+    rejected(CableEnabled=True,CableHoleWidth=12.)
+    rejected(CableEnabled=True,CableHoleRadius=10.)
+    rejected(CableEnabled=True,CableHoleWidth=17.,CableHoleHeight=18.,CableHoleRadius=3.)

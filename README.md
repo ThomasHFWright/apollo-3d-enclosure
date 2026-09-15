@@ -4,7 +4,7 @@ A community enclosure for the **Apollo Automation R PRO-1**, designed with FreeC
 
 ![Corner preset](docs/images/corner.png)
 
-*Corner preset; the blue cable is a reference preview, not a printed tube.*
+*Cable-enabled corner demonstration with a 30 mm chamber. The blue cable is a reference preview, not a printed tube. Downloadable examples have cable routing disabled by default.*
 
 **Only two STL files are needed to print an enclosure: one body and one lid.** The front sensor window is 1.2 mm thick; actual radar performance and long-term PETG behaviour still need checking in your installation.
 
@@ -14,6 +14,8 @@ This is an independent community project, not an official Apollo product. Thanks
 
 1. Download the **[shared lid.stl](output/lid.stl)**.
 2. Choose **one body STL** from the examples below, or generate a body with your own angles in FreeCAD.
+
+The default requested rear chamber is **10 mm**; the corridor snapshot retains its custom 1 mm depth. Cable routing is **off by default** in every downloadable example and new build. To enable the preview and intersection cutouts, set **CableEnabled = Yes** in FreeCAD and run the macro. The main image above intentionally shows this optional feature enabled.
 
 Print one of each. The flat, corner, right-facing, left-facing and corridor downloads are **alternative examples of the body**, not extra parts to print. All supplied examples use the same lid; duplicate lid downloads have been removed from their folders.
 
@@ -47,10 +49,10 @@ These values were read from each saved CAD document for this publication. Saved 
 
 | Version | Mount | Yaw / pitch | Requested rear chamber | Cable | Files |
 |---|---|---|---|---|---|
-| Flat | Flat wall | 0° / 0° | 30 mm | On | [CAD](output/flat/apollo-mount.FCStd) · [body](output/flat/body.stl) |
-| Corner | 90° inside corner | 0° / 15° | 30 mm | On | [CAD](output/corner/apollo-mount.FCStd) · [body](output/corner/body.stl) |
-| Right-facing | Flat wall | +90° / 0° | 30 mm | On | [CAD](output/yaw90/apollo-mount.FCStd) · [body](output/yaw90/body.stl) |
-| Left-facing | Flat wall | −90° / 0° | 30 mm | On | [CAD](output/yaw_minus90/apollo-mount.FCStd) · [body](output/yaw_minus90/body.stl) |
+| Flat | Flat wall | 0° / 0° | 10 mm | Off | [CAD](output/flat/apollo-mount.FCStd) · [body](output/flat/body.stl) |
+| Corner | 90° inside corner | 0° / 15° | 10 mm | Off | [CAD](output/corner/apollo-mount.FCStd) · [body](output/corner/body.stl) |
+| Right-facing | Flat wall | +90° / 0° | 10 mm | Off | [CAD](output/yaw90/apollo-mount.FCStd) · [body](output/yaw90/body.stl) |
+| Left-facing | Flat wall | −90° / 0° | 10 mm | Off | [CAD](output/yaw_minus90/apollo-mount.FCStd) · [body](output/yaw_minus90/body.stl) |
 | Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) |
 | Entrance snapshot | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/Final-prints/entrance.FCStd) · [body](output/Final-prints/entrance.stl) |
 
@@ -72,7 +74,7 @@ The saved [corridor example](output/Final-prints/entrance.FCStd): **Yaw −39°,
 
 ![Flat-wall mount facing 70 degrees right with 10-degree downward pitch](docs/images/flat-yaw70.png)
 
-Rendered from the flat preset with **Yaw +70° and Pitch +10°**, retaining its 30 mm requested rear chamber and enabled cable routing. To make this version, open the flat CAD example in FreeCAD, change those two parameters and run the macro. Use −70° yaw to face the other way.
+Rendered from the flat preset with **Yaw +70° and Pitch +10°**, using the 10 mm default rear chamber with cable routing disabled. To make this version, open the flat CAD example in FreeCAD, change those two parameters and run the macro. Use −70° yaw to face the other way.
 
 Both views show the assembled body and shared lid. PCB and cable reference objects are hidden to make the enclosure shape clear.
 

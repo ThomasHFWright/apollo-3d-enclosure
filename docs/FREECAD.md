@@ -23,7 +23,7 @@ For example, a corner model aimed mainly along one wall:
 | CornerSetback | 10 |
 | Yaw | -39 |
 | Pitch | 4 |
-| RearChamberDepth | 30 |
+| RearChamberDepth | 10 |
 | CableEnabled | No |
 
 Press Enter or click another property to finish the edit. Boolean values use Yes/No, and `FastenerSize` offers an M2/M3 dropdown. Read-only calculated values cannot drive geometry: for example, change `RearChamberDepth`, not `BoardDistance`.
@@ -74,6 +74,8 @@ Select a tree object and press **Space**:
 - `CablePreview`: actual cable diameter, shown only when cable processing is enabled.
 - `PlugClearance`: provisional plug/boot envelope.
 - `CableCentreline`: routing curve.
+
+The supplied examples start with **CableEnabled = No**. To add cable routing, set it to **Yes** and run the macro.
 
 Hiding a cable preview does **not** disable cable processing. Set `CableEnabled = No` and rebuild to remove routing constraints, cutouts and reinforcement. No cable tube is printed.
 

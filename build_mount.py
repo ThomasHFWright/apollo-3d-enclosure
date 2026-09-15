@@ -42,7 +42,7 @@ PARAMETERS = [
     ("CornerSpine", False, "Mount", "Extend flat corner closure continuously from top to bottom; No closes only the end gaps"),
     ("Yaw", 0., "Mount", "Facing angle: positive turns the sensor toward the right"),
     ("Pitch", 0., "Mount", "Positive tilts the sensor downward"),
-    ("RearChamberDepth", 30., "Mount", "Mounting-frame front plane to centre of electronics-bay rear rim; excludes the PCB/modules bay"),
+    ("RearChamberDepth", 10., "Mount", "Mounting-frame front plane to centre of electronics-bay rear rim; excludes the PCB/modules bay"),
     ("FrontHeight", 13.9, "Clearances", "PCB front face to tallest module including pins"),
     ("RearHeight", 16.9, "Clearances", "PCB rear face to PoE socket opening"),
     ("SideOverhang", 1.4, "Clearances", "Reserve measured black-part overhang on both sides"),
@@ -74,7 +74,7 @@ PARAMETERS = [
     ("VentSlot", 6., "Printing", "Width of ventilation slots, separated by structural ribs"),
     ("VentRib", 3., "Printing", "Material between ventilation slots"),
     ("SideVentOffset", 4., "Printing", "Move side-wall slots upward to strengthen the lower edge"),
-    ("CableEnabled", True, "Cable", "Enable cable preview, routing checks, connector cutouts and reinforcement; No skips all cable processing"),
+    ("CableEnabled", False, "Cable", "Enable cable preview, routing checks, connector cutouts and reinforcement; No skips all cable processing"),
     ("PortX", -.025, "Cable", "Socket aperture centre, from source mesh cross-section"),
     ("PortY", -8.907, "Cable", "Socket aperture centre, from source mesh cross-section"),
     ("PlugWidth", 17., "Cable", "PROVISIONAL plug/boot clearance width"),
@@ -267,7 +267,7 @@ def cable_openings(stock, wire, clearance, guard, vents, other_cuts):
 def build(p):
     nut_flats,nut_depth,screw_hole=fastener_dimensions(p)
     head_diameter,head_depth=head_recess_dimensions(p)
-    cable_enabled=p.get('CableEnabled',True)
+    cable_enabled=p.get('CableEnabled',False)
     ignored={name for name,_,group,_ in PARAMETERS if group=='Cable'} if not cable_enabled else set()
     for key, value in p.items():
         if key not in ignored and key != "FastenerSize" and not isinstance(value, bool) and not math.isfinite(value):
@@ -755,7 +755,7 @@ def export(doc,p,result,folder,gui=False,preview=False):
         obj.Shape=shape
         if gui:
             obj.ViewObject.ShapeColor=(.76,.82,.86) if name=="Mount" else (.92,.92,.90)
-            obj.ViewObject.Visibility=name in ("Mount","Cover") or (name=="CablePreview" and p.get('CableEnabled',True))
+            obj.ViewObject.Visibility=name in ("Mount","Cover") or (name=="CablePreview" and p.get('CableEnabled',False))
             if name=="CablePreview":
                 obj.ViewObject.ShapeColor=(.15,.65,1.)
                 obj.ViewObject.Transparency=35
@@ -833,7 +833,7 @@ def export(doc,p,result,folder,gui=False,preview=False):
         doc.Cover.ViewObject.Transparency=70
         Gui.updateGui()
         doc.save()
-    cable_status=f"cable radius {result['radius']:.1f} mm" if p.get('CableEnabled',True) else 'cable disabled'
+    cable_status=f"cable radius {result['radius']:.1f} mm" if p.get('CableEnabled',False) else 'cable disabled'
     print(f"PASS {folder.name}: two valid solids; no module/wall/cover collision; closed printable meshes; {cable_status}",flush=True)
 
 

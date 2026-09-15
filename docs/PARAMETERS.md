@@ -20,7 +20,7 @@ When CableEnabled is No, other Cable-group inputs are ignored. Module, structura
 | `CornerSpine` | No | No retains 4 mm thick closures at the top/bottom only. Yes fills the same flat-backed strip over the height. Relevant only to corner mounts with nonzero setback. |
 | `Yaw` | 0 | −90 to +90°. Rotation about model Y. 0 is straight ahead for flat mounts and along the corner bisector for corner mounts. The PCB shifts sideways by half its width × sin(yaw); verify direction visually. |
 | `Pitch` | 0 | −40 to +40°. Positive tilts down, negative tilts up. Combined with yaw; the geometry may move forward to avoid the wall. |
-| `RearChamberDepth` | 30 | Must be positive. Sets the rear chamber length, excluding the electronics bay. Short values can omit short vents. Rotated components may still need extra stand-off; inspect AdditionalWallClearance. It is not the full wall-to-PCB distance. |
+| `RearChamberDepth` | 10 | Must be positive. Sets the rear chamber length, excluding the electronics bay. Short values can omit short vents. Rotated components may still need extra stand-off; inspect AdditionalWallClearance. It is not the full wall-to-PCB distance. |
 
 ## Clearances
 
@@ -72,7 +72,7 @@ When CableEnabled is No, other Cable-group inputs are ignored. Module, structura
 
 | Parameter | Default | Meaning and how to use it |
 |---|---:|---|
-| `CableEnabled` | Yes | No skips ALL cable checks, previews, cutouts and cable reinforcement; saved cable values are retained for re-enabling. PCB/module/wall checks remain active. Hiding CablePreview alone does not disable processing. |
+| `CableEnabled` | No | No skips ALL cable checks, previews, cutouts and cable reinforcement; saved cable values are retained for re-enabling. PCB/module/wall checks remain active. Hiding CablePreview alone does not disable processing. |
 | `PortX` | -0.025 | Socket-centre X in PCB coordinates. Source default −0.025 mm. Change only after checking the real connector position. |
 | `PortY` | -8.907 | Socket-centre Y in PCB coordinates. Source default −8.907 mm. This is not the cable entry position on the wall. |
 | `PlugWidth` | 17 | Positive. Provisional rigid plug/boot cross-section width. Measure your plug, including moulded boot; the passage must contain it. |
