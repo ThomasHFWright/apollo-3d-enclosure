@@ -424,6 +424,14 @@ def build(p):
         if compact:
             return shape.cut(Part.makeCompound(wall_voids)).common(box(-500,500,-500,500,p['CornerSetback'],500))
         return shape.common(box(-500,500,-500,500,rear_z,500))
+    frame_bridges=Part.makeCompound([])
+    if compact:
+        # Close the small wedge left where the lid-plane trim meets the frame.
+        # Stay within its wall-side clearance band, outside the PCB/lid envelope.
+        bands=[moved(box(-500,500,-bh/2,bh/2,0,plate+wall),
+                     App.Placement(V(),App.Rotation(V(0,1,0),a))) for a in (-angle,angle)]
+        frame_bridges=rear_clip(outer).common(front_cut).common(Part.makeCompound(bands))
+        frame_bridges=frame_bridges.common(box(-500,500,-500,500,rear_z,500))
     outer=rear_clip(outer.cut(front_cut))
     mount_y = bh/2+10  # Exposed mounting ears keep wall-screw access outside the cage.
     chamber_faces=inner.Faces
@@ -501,7 +509,7 @@ def build(p):
             if panel.common(local(access)).Volume>.001:
                 panels.append(panel)
         if panels:pocket_panels.append(guard.common(Part.makeCompound(panels)))
-    vent_protected=Part.makeCompound(pocket_panels+[local(holder)])
+    vent_protected=Part.makeCompound(pocket_panels+[local(holder),frame_bridges])
     # Inset each actual chamber face, then cut parallel slots through that face
     # only. The same margins work on trapezoids and the short end panels at 90°.
     vents=[]
@@ -563,7 +571,7 @@ def build(p):
         for x in (-bw/2+5,bw/2-5):
             for y in (-mount_y+5,mount_y-5):
                 screws += [Part.makeCylinder(2.3,6,V(x,y,-1)),Part.makeCone(2.3,4.5,2.2,V(x,y,1.9))]
-    body=fuse([body,base]).cut(fuse(screws))
+    body=fuse([body,base,frame_bridges]).cut(fuse(screws))
     if local(holder).cut(nut_access_shape).cut(body).Volume>.01:
         raise ValueError('Chamber does not fully support the rigid PCB rim')
 
@@ -751,13 +759,15 @@ def build(p):
                 if plug.common(obstacle).Volume > .01:
                     raise ValueError("Compact corner plug clearance is obstructed; increase chamber depth or adjust route")
     if compact:
-        if body.cut(base).common(front_cut).Volume>.001:
+        if body.cut(Part.makeCompound([base,frame_bridges])).common(front_cut).Volume>.001:
             raise ValueError('Chamber extends beyond the lid seating plane')
         bearings=Part.makeCompound(screw_pads).cut(fuse(screws))
         if bearings.cut(body).Volume>.01:
             raise ValueError('Mounting-screw bearing material was removed')
         if base.cut(fuse(screws)).cut(cable_cut).cut(body).Volume>.01:
             raise ValueError('Wall-contact frame material was removed')
+        if frame_bridges.cut(cable_cut).cut(body).Volume>.01:
+            raise ValueError('Chamber-to-frame closure material was removed')
     if body.common(lid).Volume > .01:
         raise ValueError("Cover and body overlap")
     if cable_enabled and body.common(cable_preview).Volume > .01:
@@ -765,7 +775,7 @@ def build(p):
     return dict(corner_depth_saving=original_centre.z-centre.z,body=body,lid=lid,reserved=reserved,plug=plug,path=path,passage=passage,cable_preview=cable_preview,pose=pose,seam=seam,
                 ceiling=ceiling+p["FrontSkin"],radius=radius,contacts=contacts,end_contacts=end_contacts,retention=feet+keepers,
                 rear_vents=rear_vents,actual_entry_depth=end.z-rear_front,actual_tangent_length=handle,
-                rear_front=rear_front,wall_width=bw,wall_height=bh,vent_tools=all_vents,mount_frame=base,
+                rear_front=rear_front,wall_width=bw,wall_height=bh,vent_tools=all_vents,mount_frame=base,frame_bridges=frame_bridges,
                 nut_access=nut_access_shape,co2_cut=local(co2_local),
                 nut_vent_keepout=Part.makeCompound(pocket_panels),
                 cable_vent_keepout=cable_guard,

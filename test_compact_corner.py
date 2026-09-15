@@ -44,7 +44,12 @@ def check():
             shape.check(True)
             assert len(shape.Solids)==1 and m.closed_mesh(shape).isSolid()
         above=m.moved(m.box(-500,500,-500,500,r['seam'],500),r['pose'])
-        assert r['body'].cut(r['mount_frame']).common(above).Volume<.001, 'Chamber rises around lid'
+        frame=m.Part.makeCompound([r['mount_frame'],r['frame_bridges']])
+        assert r['body'].cut(frame).common(above).Volume<.001, 'Chamber rises around lid'
+        if abs(p['Yaw'])==39 and p['Pitch']==15:
+            # Inside the previously open triangular frame/chamber junction.
+            probe=m.Part.makeSphere(.2,m.V(31.1 if p['Yaw']>0 else -31.1,-28.3,37.8))
+            assert probe.cut(r['body']).Volume<1e-6, 'Gap beside wall-contact frame'
         # Four original wall-screw bores must still be present and unobstructed.
         angle=90-p['CornerAngle']/2
         length=r['wall_width']/2/m.math.cos(m.math.radians(angle))
