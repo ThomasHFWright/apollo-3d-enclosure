@@ -15,6 +15,8 @@ def check():
     assert not saved['CompactCorner']
     for changes in (dict(Yaw=-39.,Pitch=4.,CableEnabled=True),
                     dict(Yaw=39.,Pitch=4.,CableEnabled=True),
+                    dict(Yaw=39.,Pitch=15.,CableEnabled=False),
+                    dict(Yaw=-39.,Pitch=15.,CableEnabled=False),
                     dict(Yaw=0.,Pitch=15.,CableEnabled=False),
                     dict(Yaw=-70.,Pitch=10.,CableEnabled=False),
                     dict(Yaw=-90.,Pitch=0.,CableEnabled=False),
@@ -23,6 +25,13 @@ def check():
         p=dict(saved,**changes);p['CompactCorner']=True
         r=m.build(p)
         assert r['corner_depth_saving']>0
+        if abs(p['Yaw'])==39 and p['Pitch']==15:
+            # Material in the wall outside the lid footprint: an infinite
+            # front-plane trim removed these points while leaving a valid solid.
+            sign=1 if p['Yaw']>0 else -1
+            for x,y,z in ((29.28,-25.,38.85),(27.2,-10.,41.81),(27.44,0.,42.11)):
+                probe=m.Part.makeSphere(.1,m.V(sign*x,y,z))
+                assert probe.cut(r['body']).Volume<1e-6, 'Missing wall outside lid footprint'
         if p['Yaw']==0 and p['Pitch']==15:
             assert r['corner_depth_saving']>13, 'Empty rectangular rear bay still sets stand-off'
         # Nesting must not add a panel across the open back of the corner frame.

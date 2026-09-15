@@ -398,6 +398,14 @@ def build(p):
     # approximation tolerance. Preserve their small arcs at kernel precision.
     if radius:outer=outer.makeOffsetShape(radius,1e-7,join=0)
     front_cut=local(box(-500,500,-500,500,seam,500))
+    if compact:
+        # A rotated PCB plane can cross the mounting frame. Open only the lid
+        # footprint; chamber panels outside it must still reach the frame.
+        # Keeper rails extend 0.1 mm beyond the skirt for their fused joints.
+        lid_space=[box(-ox-.2,ox+.2,oy0-.2,oy1+.2,seam,500)]
+        lid_space += [Part.makeCylinder(4.7,500,V(sign*(ox+3),y,seam))
+                      for sign in (-1,1) for y in (p['LowerContactY'],p['UpperContactY'])]
+        front_cut=local(fuse(lid_space))
     def rear_clip(shape):
         if compact:
             return shape.cut(Part.makeCompound(wall_voids)).common(box(-500,500,-500,500,p['CornerSetback'],500))
@@ -458,7 +466,7 @@ def build(p):
     # At steep angles the convex cavity can be wider than the PCB rim. Close
     # that excess locally so the unchanged holder joins a full collar, rather
     # than touching the chamber at isolated edges.
-    inner=inner.cut(local(box(-500,500,-500,500,grip_back,500)))
+    inner=inner.cut(local(box(-500,500,-500,500,grip_back,seam if compact else 500)))
     inner=inner.fuse(local(box(-ix,ix,iy0,iy1,grip_back-.1,seam+1)))
     body = outer.cut(inner)
     body.check(True)
