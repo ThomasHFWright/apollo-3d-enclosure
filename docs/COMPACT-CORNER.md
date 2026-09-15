@@ -27,7 +27,7 @@ The original placement used a full-depth, full-height bounding box including the
 
 Compact mode separates the rigid PCB holder, cover and screw housings from the rear component-clearance envelope, balances clearance against both walls, and lets the chamber taper into the hollow corner. The empty rear bay no longer acts as a full-width rigid box during placement. The back stays open: the existing corner frame supplies the wall-contact material, with end closures and screw supports retained. The mounting pads and screw centres stay in place. The PCB, lid and retention rails remain rigid. This is the minimum of the conservative placement envelopes plus the requested extra stand-off, not proof of the absolute smallest possible enclosure.
 
-When the tilted PCB plane crosses the frame, the front opening follows the lid and screw footprint. This preserves the chamber wall outside the lid rather than cutting a gap beside the frame. The supporting ring remains solid, while chamber extensions beyond that ring stay hollow.
+The chamber and frame stop at the lid seating plane, so the lid sits on top of the body. Placement reserves the full bearing pads around all four wall screws, then trims unused frame corners to that plane. When the pads require it, the PCB shifts along the corner and gains stand-off; RearChamberDepth adds space beyond this minimum. The supporting PCB ring and lid geometry remain unchanged.
 
 The provisional rigid plug envelope is included when CableEnabled is Yes. The existing route generation and reinforced intersection cutouts then run in the new position. When CableEnabled is No, cable parameters remain ignored; that setting does not establish plug or bend clearance.
 
@@ -49,7 +49,7 @@ Both versions keep −39° yaw, +4° pitch and the requested depth value 1 mm. T
 
 The centre shifts sideways by 15.07 mm as well as moving back. The 16.97 mm figure is along the corner bisector, not perpendicular to either wall. Read-only `CornerDepthSaving` compares the two placement rules at the same parameter values; `BoardDistance` still reports actual PCB distance ahead of the rear-frame front plane. `AdditionalWallClearance` is zero in compact mode because placement is calculated directly.
 
-With the redundant rear panels removed, the compact body's solid CAD volume is about 51.8 cm³ versus 55.7 cm³ for the original cable-off print. Actual sliced filament depends on orientation, infill and supports.
+With the redundant rear panels removed, the compact body's solid CAD volume is about 48.2 cm³ versus 55.7 cm³ for the original cable-off print. Actual sliced filament depends on orientation, infill and supports.
 
 ### Top views — same camera and scale
 
@@ -73,12 +73,12 @@ Separating the rear clearance envelope from the rigid holder reduces the PCB-cen
 
 ## Combined yaw and pitch
 
-At yaw 39° and pitch 15°, the chamber wall now continues to the frame without the diagonal gap. The PCB position and open back are unchanged.
+At yaw −39° and pitch 15°, keeping all four screw mounts behind the lid requires 7.56 mm more forward stand-off than the previous recessed-lid prototype, together with a 7.56 mm sideways shift. The PCB centre is now Z=63.86 mm, still 13.37 mm closer than the standard placement. Unused frame corners are trimmed and the back stays open. The mirrored +39° case receives the equivalent adjustment.
 
-![Continuous chamber wall at yaw 39 and pitch 15](images/compact-yaw39-pitch15.png)
+![Lid above the body at yaw minus 39 and pitch 15](images/compact-yaw39-pitch15.png)
 
 ## Checks
 
-Run `python test_compact_corner.py` with the installed FreeCAD libraries. It checks the source corridor against the standard generator, compact ±39° cable-enabled examples, ±39°/15° cases with explicit checks for material in the wall beside the lid, straight/tilted, −70° and ±90° examples, a 110° corner, unchanged lid/PCB contact geometry, CO₂ clearance, wall-screw bores, an unobstructed rear opening and valid connected closed meshes. All eight published saved CAD examples are rebuilt from their own parameters into temporary folders, checking both exported parts, bed placement and A1 bounds. Standard flat/corner bodies and lids are also compared geometrically with their saved originals. A further check confirms that adding 5 mm to RearChamberDepth moves the PCB forward exactly 5 mm while preserving connector clearance.
+Run `python test_compact_corner.py` with the installed FreeCAD libraries. It checks the source corridor against the standard generator, compact ±39° cable-enabled examples, ±39°/15° cases with explicit checks that the whole body stays behind the lid seating plane, straight/tilted, −70° and ±90° examples, a 110° corner, unchanged lid/PCB contact geometry, CO₂ clearance, wall-screw bores and bearing pads, an unobstructed rear opening and valid connected closed meshes. All eight published saved CAD examples are rebuilt from their own parameters into temporary folders, checking both exported parts, bed placement and A1 bounds. Standard flat/corner bodies and lids are also compared geometrically with their saved originals. A further check confirms that adding 5 mm to RearChamberDepth moves the PCB forward exactly 5 mm while preserving connector clearance.
 
 The saved example is generated by executing the actual FreeCAD GUI rebuild macro in an isolated directory, then checking its saved parameters and exports. No structural/thermal simulation or physical print has been performed for this branch; existing FEM reports do not validate this changed body.

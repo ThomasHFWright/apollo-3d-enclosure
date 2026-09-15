@@ -11,7 +11,7 @@
   ],
   "bisector_reduction_mm": 16.96848692381429,
   "old_body_volume_mm3": 55651.50464077958,
-  "new_body_volume_mm3": 51767.180031605545,
+  "new_body_volume_mm3": 48239.36671504694,
   "actual_cable_entry_depth_mm": -62.0,
   "parameters": {
     "Corner": true,

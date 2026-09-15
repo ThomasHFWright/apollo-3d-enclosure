@@ -372,9 +372,31 @@ def build(p):
             projection=App.Placement(V(),App.Rotation(n,V(0,0,1)).multiply(rotation))
             low=min(moved(shape,projection).BoundBox.ZMin for shape in envelope)
             limits.append(plate+wall-low)
+        # Keep complete mounting-screw bearing pads behind the lid seating
+        # plane. Unused frame corners may be trimmed instead of adding depth.
+        front_normal=rotation.multVec(V(0,0,1))
+        projection=App.Placement(V(),App.Rotation(front_normal,V(0,0,1)))
+        length=bw/2/math.cos(math.radians(angle))
+        screw_pads=[]
+        for sign in (-1,1):
+            frame_pose=App.Placement(V(),App.Rotation(V(0,1,0),-sign*angle))
+            for y in (-bh/2-5,bh/2+5):
+                pad=Part.makeCylinder(4.5+wall,plate,V(sign*length*.65,y,0))
+                pad=pad.common(box(-length,length,-bh/2-10,bh/2+10,0,plate))
+                screw_pads.append(moved(pad,frame_pose))
+        pad_front=max(moved(pad,projection).BoundBox.ZMax for pad in screw_pads)
         a,b=wall_normals
         centre.x=(limits[0]-limits[1])/(a.x-b.x)
-        centre.z=(limits[0]-a.x*centre.x)/a.z+p['RearChamberDepth']
+        centre.z=(limits[0]-a.x*centre.x)/a.z
+        missing=max(0.,pad_front-seam+.2-front_normal.dot(centre))
+        # The two symmetric walls bound sideways travel by dz/tan(angle).
+        # Use that travel toward the lid normal to minimize added stand-off.
+        slope=math.tan(math.radians(angle))
+        extra=missing/(front_normal.z+abs(front_normal.x)/slope)
+        centre.z+=extra
+        if abs(front_normal.x)>1e-9:
+            centre.x+=math.copysign(extra/slope,front_normal.x)
+        centre.z+=p['RearChamberDepth']
     pose=App.Placement(centre,rotation)
     local=lambda s:moved(s,pose)
     points=[V(x,y,rear_z-1) for x in (-bw/2+plate,bw/2-plate) for y in (-bh/2+plate,bh/2-plate)]
@@ -398,14 +420,6 @@ def build(p):
     # approximation tolerance. Preserve their small arcs at kernel precision.
     if radius:outer=outer.makeOffsetShape(radius,1e-7,join=0)
     front_cut=local(box(-500,500,-500,500,seam,500))
-    if compact:
-        # A rotated PCB plane can cross the mounting frame. Open only the lid
-        # footprint; chamber panels outside it must still reach the frame.
-        # Keeper rails extend 0.1 mm beyond the skirt for their fused joints.
-        lid_space=[box(-ox-.2,ox+.2,oy0-.2,oy1+.2,seam,500)]
-        lid_space += [Part.makeCylinder(4.7,500,V(sign*(ox+3),y,seam))
-                      for sign in (-1,1) for y in (p['LowerContactY'],p['UpperContactY'])]
-        front_cut=local(fuse(lid_space))
     def rear_clip(shape):
         if compact:
             return shape.cut(Part.makeCompound(wall_voids)).common(box(-500,500,-500,500,p['CornerSetback'],500))
@@ -466,7 +480,7 @@ def build(p):
     # At steep angles the convex cavity can be wider than the PCB rim. Close
     # that excess locally so the unchanged holder joins a full collar, rather
     # than touching the chamber at isolated edges.
-    inner=inner.cut(local(box(-500,500,-500,500,grip_back,seam if compact else 500)))
+    inner=inner.cut(local(box(-500,500,-500,500,grip_back,500)))
     inner=inner.fuse(local(box(-ix,ix,iy0,iy1,grip_back-.1,seam+1)))
     body = outer.cut(inner)
     body.check(True)
@@ -549,6 +563,10 @@ def build(p):
         for x in (-bw/2+5,bw/2-5):
             for y in (-mount_y+5,mount_y-5):
                 screws += [Part.makeCylinder(2.3,6,V(x,y,-1)),Part.makeCone(2.3,4.5,2.2,V(x,y,1.9))]
+    if compact:
+        base=base.cut(front_cut)
+        if any(pad.cut(base).Volume>.001 for pad in screw_pads):
+            raise ValueError('Lid-plane trim removes mounting-screw bearing material')
     body=fuse([body,base]).cut(fuse(screws))
     if local(holder).cut(nut_access_shape).cut(body).Volume>.01:
         raise ValueError('Chamber does not fully support the rigid PCB rim')
@@ -736,6 +754,12 @@ def build(p):
             for obstacle in [body,lid]+wall_voids:
                 if plug.common(obstacle).Volume > .01:
                     raise ValueError("Compact corner plug clearance is obstructed; increase chamber depth or adjust route")
+    if compact:
+        if body.common(front_cut).Volume>.001:
+            raise ValueError('Body extends beyond the lid seating plane')
+        bearings=Part.makeCompound(screw_pads).cut(fuse(screws))
+        if bearings.cut(body).Volume>.01:
+            raise ValueError('Mounting-screw bearing material was removed')
     if body.common(lid).Volume > .01:
         raise ValueError("Cover and body overlap")
     if cable_enabled and body.common(cable_preview).Volume > .01:

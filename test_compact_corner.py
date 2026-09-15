@@ -25,13 +25,6 @@ def check():
         p=dict(saved,**changes);p['CompactCorner']=True
         r=m.build(p)
         assert r['corner_depth_saving']>0
-        if abs(p['Yaw'])==39 and p['Pitch']==15:
-            # Material in the wall outside the lid footprint: an infinite
-            # front-plane trim removed these points while leaving a valid solid.
-            sign=1 if p['Yaw']>0 else -1
-            for x,y,z in ((29.28,-25.,38.85),(27.2,-10.,41.81),(27.44,0.,42.11)):
-                probe=m.Part.makeSphere(.1,m.V(sign*x,y,z))
-                assert probe.cut(r['body']).Volume<1e-6, 'Missing wall outside lid footprint'
         if p['Yaw']==0 and p['Pitch']==15:
             assert r['corner_depth_saving']>13, 'Empty rectangular rear bay still sets stand-off'
         # Nesting must not add a panel across the open back of the corner frame.
@@ -50,6 +43,9 @@ def check():
         for shape in (r['body'],r['lid']):
             shape.check(True)
             assert len(shape.Solids)==1 and m.closed_mesh(shape).isSolid()
+        mesh=m.closed_mesh(r['body'])
+        mesh.transform(r['pose'].inverse().toMatrix())
+        assert mesh.BoundBox.ZMax<=r['seam']+.01, 'Body rises around lid'
         # Four original wall-screw bores must still be present and unobstructed.
         angle=90-p['CornerAngle']/2
         length=r['wall_width']/2/m.math.cos(m.math.radians(angle))
