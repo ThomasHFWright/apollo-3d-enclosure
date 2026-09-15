@@ -50,6 +50,14 @@ def check():
             # Inside the previously open triangular frame/chamber junction.
             probe=m.Part.makeSphere(.2,m.V(31.1 if p['Yaw']>0 else -31.1,-28.3,37.8))
             assert probe.cut(r['body']).Volume<1e-6, 'Gap beside wall-contact frame'
+            # Continue past the old fixed-width cliff and reach the lid seat.
+            side=1 if p['Yaw']>0 else -1
+            probe=m.Part.makeSphere(.2,m.V(side*29,-28,40))
+            assert probe.cut(r['body']).Volume<1e-6, 'Cliff beside lid seat'
+            ox=m.W/2+p['SideOverhang']+p['SideClearance']+p['WallThickness']
+            x0,x1=sorted((side*(ox+.25),side*(ox+.35)))
+            probe=m.moved(m.box(x0,x1,-28.1,-27.9,r['seam']+.01,r['seam']+.03),r['pose'])
+            assert probe.cut(r['body']).Volume<1e-7, 'Taper stops short of lid seat'
         # Four original wall-screw bores must still be present and unobstructed.
         angle=90-p['CornerAngle']/2
         length=r['wall_width']/2/m.math.cos(m.math.radians(angle))

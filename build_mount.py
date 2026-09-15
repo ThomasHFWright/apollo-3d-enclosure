@@ -426,12 +426,17 @@ def build(p):
         return shape.common(box(-500,500,-500,500,rear_z,500))
     frame_bridges=Part.makeCompound([])
     if compact:
-        # Close the small wedge left where the lid-plane trim meets the frame.
-        # Stay within its wall-side clearance band, outside the PCB/lid envelope.
-        bands=[moved(box(-500,500,-bh/2,bh/2,0,plate+wall),
-                     App.Placement(V(),App.Rotation(V(0,1,0),a))) for a in (-angle,angle)]
-        frame_bridges=rear_clip(outer).common(front_cut).common(Part.makeCompound(bands))
-        frame_bridges=frame_bridges.common(box(-500,500,-500,500,rear_z,500))
+        # Taper the frame closure down to the lid seat instead of ending it at
+        # a fixed wall-distance cutoff. The expanding clearance makes a 45°
+        # slope, with curved relief around the four lid screw housings.
+        height=max(1.,moved(outer,pose.inverse()).BoundBox.ZMax-seam+1.)
+        clearance=[convex_envelope([V(x,y,seam+t) for t in (0.,height)
+                    for x in (-ox-t-.2,ox+t+.2) for y in (oy0-t-.2,oy1+t+.2)])]
+        clearance += [Part.makeCone(4.7,4.7+height,height,V(sign*(ox+3),y,seam))
+                      for sign in (-1,1) for y in (p['LowerContactY'],p['UpperContactY'])]
+        frame_bridges=rear_clip(outer).common(front_cut)
+        for tool in clearance:frame_bridges=frame_bridges.cut(local(tool))
+        frame_bridges=frame_bridges.common(box(-500,500,-bh/2,bh/2,rear_z,500))
     outer=rear_clip(outer.cut(front_cut))
     mount_y = bh/2+10  # Exposed mounting ears keep wall-screw access outside the cage.
     chamber_faces=inner.Faces
