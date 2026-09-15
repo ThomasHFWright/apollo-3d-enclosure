@@ -106,7 +106,7 @@ test_mount.check_co2_relief(p, result)
 7. Slice for the actual printer and orientation. Review the first unsupported layer under each large span, not just the final support silhouette.
 8. Report what was changed, which tests passed, what was actually printed, and what remains provisional. A screenshot or low FEM stress alone is not evidence of a successful physical fit or long-term heat resistance.
 
-Do not change another saved preset merely because it has different parameters. Do not replace a user's latest Orca arrangement with an older example or silently inherit old toolpaths. The geometry exports are separate from slicer projects.
+Do not change another saved preset merely because it has different parameters. Do not replace a user's latest Orca arrangement with an older example or silently inherit old toolpaths. The geometry exports are separate from slicer projects. Published body examples share `output/lid.stl` and `output/lid.step`; avoid publishing duplicate lids for mounting-angle variants. Keep both parts in generated custom exports because dimension or fastener changes can require a different lid.
 
 ## Structural screening
 

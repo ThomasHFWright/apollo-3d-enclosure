@@ -6,9 +6,18 @@ A community enclosure for the **Apollo Automation R PRO-1**, designed with FreeC
 
 *Corner preset; the blue cable is a reference preview, not a printed tube.*
 
-**Two assembly parts:** body and lid. The front sensor window is 1.2 mm thick; actual radar performance and long-term PETG behaviour still need checking in your installation.
+**Only two STL files are needed to print an enclosure: one body and one lid.** The front sensor window is 1.2 mm thick; actual radar performance and long-term PETG behaviour still need checking in your installation.
 
 This is an independent community project, not an official Apollo product. Thanks to [Apollo Automation](https://apolloautomation.com/products/r-pro-1) for providing the PCB and case references. See [attribution and reuse terms](ATTRIBUTION.md).
+
+## What to download for printing
+
+1. Download the **[shared lid.stl](output/lid.stl)**.
+2. Choose **one body STL** from the examples below, or generate a body with your own angles in FreeCAD.
+
+Print one of each. The flat, corner, right-facing, left-facing and corridor downloads are **alternative examples of the body**, not extra parts to print. All supplied examples use the same lid; duplicate lid downloads have been removed from their folders.
+
+The FreeCAD documents, STEP files, PCB reference and scripts are for editing or development. They are not additional printable parts. If you want to change parameters, download the whole repository and follow the FreeCAD workflow below.
 
 ## Edit your model in FreeCAD — recommended workflow
 
@@ -32,20 +41,20 @@ Existing supplied CAD files include the PCB reference, so the normal workflow ab
 - **Print an existing version:** use the model downloads below and the [printing guide](docs/PRINTING.md).
 - **AI assistance and advanced automation:** [AI/developer guide](docs/AI-WORKFLOW.md).
 
-## Included models
+## Body examples — choose one
 
-These values were read from each saved CAD document for this publication. Defaults in the parameter reference describe new CLI builds; saved models can have different settings.
+These values were read from each saved CAD document for this publication. Saved models can have different mounting settings; their lid geometry was compared and is identical. Defaults in the parameter reference describe new CLI builds.
 
 | Version | Mount | Yaw / pitch | Requested rear chamber | Cable | Files |
 |---|---|---|---|---|---|
-| Flat | Flat wall | 0° / 0° | 30 mm | On | [CAD](output/flat/apollo-mount.FCStd) · [body](output/flat/body.stl) · [lid](output/flat/lid.stl) |
-| Corner | 90° inside corner | 0° / 15° | 30 mm | On | [CAD](output/corner/apollo-mount.FCStd) · [body](output/corner/body.stl) · [lid](output/corner/lid.stl) |
-| Right-facing | Flat wall | +90° / 0° | 30 mm | On | [CAD](output/yaw90/apollo-mount.FCStd) · [body](output/yaw90/body.stl) · [lid](output/yaw90/lid.stl) |
-| Left-facing | Flat wall | −90° / 0° | 30 mm | On | [CAD](output/yaw_minus90/apollo-mount.FCStd) · [body](output/yaw_minus90/body.stl) · [lid](output/yaw_minus90/lid.stl) |
-| Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) · [lid](output/custom/lid.stl) |
-| Entrance snapshot | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/Final-prints/entrance.FCStd) · [body](output/Final-prints/entrance.stl) · [lid](output/Final-prints/lid.stl) |
+| Flat | Flat wall | 0° / 0° | 30 mm | On | [CAD](output/flat/apollo-mount.FCStd) · [body](output/flat/body.stl) |
+| Corner | 90° inside corner | 0° / 15° | 30 mm | On | [CAD](output/corner/apollo-mount.FCStd) · [body](output/corner/body.stl) |
+| Right-facing | Flat wall | +90° / 0° | 30 mm | On | [CAD](output/yaw90/apollo-mount.FCStd) · [body](output/yaw90/body.stl) |
+| Left-facing | Flat wall | −90° / 0° | 30 mm | On | [CAD](output/yaw_minus90/apollo-mount.FCStd) · [body](output/yaw_minus90/body.stl) |
+| Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) |
+| Entrance snapshot | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/Final-prints/entrance.FCStd) · [body](output/Final-prints/entrance.stl) |
 
-The five preset folders also contain individual STEP solids and `assembly.step`. All corner examples have a 10 mm corner-tip setback and top/bottom closures; their middle remains open. A requested 1 mm chamber does **not** mean the PCB is 1 mm from the wall: electronics space and any additional wall clearance are separate.
+The five preset folders also contain `body.step` and `assembly.step` for CAD editing. The shared lid is available as [STEP](output/lid.step) too. FreeCAD documents and assembly STEP files retain the lid in its assembled position for reference and rebuilding. All corner examples have a 10 mm corner-tip setback and top/bottom closures; their middle remains open. A requested 1 mm chamber does **not** mean the PCB is 1 mm from the wall: electronics space and any additional wall clearance are separate.
 
 `output/custom` is also the macro's working export folder and is overwritten on a successful rebuild. Copy an example you want to keep before experimenting. The entrance snapshot is kept separately as an example of that workflow.
 

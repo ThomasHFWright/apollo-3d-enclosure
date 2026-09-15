@@ -41,6 +41,8 @@ Yaw 0 faces perpendicular to a flat wall, or along the bisector of an inside cor
 
 **Changing a parameter, saving the file, or pressing Recompute/F5 is not enough. Run the macro.** The geometry comes from the Python generator; FreeCAD does not automatically call it when a float property changes.
 
+The published examples share [one lid download](../output/lid.stl); only their bodies differ. A rebuild still exports both body and lid so that changes to dimensions, PCB fit or fasteners have a matching pair. For printing, use only those two STL files.
+
 The macro saves and writes the following into `output/custom/`, overwriting matching files:
 
 | File | Purpose |
@@ -60,7 +62,7 @@ After a successful rebuild:
 2. Open that folder's `.FCStd` when you next want to edit its parameters.
 3. Rebuild still writes into `output/custom`; copy the new exports back to the named folder after checking them.
 
-The snapshot includes both compatible body and lid. If you change fasteners, fit, dimensions or angle, use the newly exported matching parts; do not assume a lid from another preset still fits. Keep the complete parameter set with the CAD file, rather than recording only yaw and pitch.
+The snapshot includes both compatible body and lid. Mounting-angle changes use the same lid as the supplied examples. If you change fasteners, PCB fit or enclosure dimensions, use the newly exported matching lid; the published shared lid may no longer fit. Keep the complete parameter set with the CAD file, rather than recording only yaw and pitch.
 
 ## Reference visibility
 
