@@ -23,6 +23,8 @@ def check():
         p=dict(saved,**changes);p['CompactCorner']=True
         r=m.build(p)
         assert r['corner_depth_saving']>0
+        if p['Yaw']==0 and p['Pitch']==15:
+            assert r['corner_depth_saving']>13, 'Empty rectangular rear bay still sets stand-off'
         # Nesting must not add a panel across the open back of the corner frame.
         # Stay near the setback: at 90 degrees the PCB rim legitimately reaches
         # into the front of the corner cavity and must remain supported there.
@@ -82,7 +84,7 @@ def check_saved_outputs():
     from tempfile import TemporaryDirectory
     for name in ('flat/apollo-mount','corner/apollo-mount','custom/apollo-mount',
                  'yaw90/apollo-mount','yaw_minus90/apollo-mount','Final-prints/entrance',
-                 'compact-corner-poe/apollo-mount'):
+                 'compact-corner-poe/apollo-mount','compact-pitch15/apollo-mount'):
         doc=m.App.openDocument(str(m.ROOT/'output'/(name+'.FCStd')))
         p=m.read_parameters(doc)
         r=m.build(p)

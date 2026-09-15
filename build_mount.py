@@ -354,8 +354,11 @@ def build(p):
     original_centre=V(centre)
     compact=p['Corner'] and p.get('CompactCorner',False)
     if compact:
-        # Separate the shallow screw housings from the taller cover and rear bay.
-        envelope=[box(-ox,ox,oy0,oy1,neck,ceiling+p['FrontSkin'])]
+        # The rear chamber can taper into the corner; it is not a rigid box.
+        # Reserve the full rear component/air envelope independently of the rim.
+        envelope=[box(-ox,ox,oy0,oy1,grip_back,ceiling+p['FrontSkin']),
+                  box(-W/2-p['SideOverhang'],W/2+p['SideOverhang'],
+                      -H/2,H/2,-p['RearHeight']-p['RearClearance'],0)]
         envelope += [Part.makeCylinder(4.5,6.5+3.2+head_depth,V(sign*(ox+3),y,seam-6.5))
                      for sign in (-1,1) for y in (p['LowerContactY'],p['UpperContactY'])]
         # Cable-off retains its existing meaning: no plug/routing constraints.
