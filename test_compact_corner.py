@@ -43,17 +43,25 @@ def check():
         for shape in (r['body'],r['lid']):
             shape.check(True)
             assert len(shape.Solids)==1 and m.closed_mesh(shape).isSolid()
-        mesh=m.closed_mesh(r['body'])
-        mesh.transform(r['pose'].inverse().toMatrix())
-        assert mesh.BoundBox.ZMax<=r['seam']+.01, 'Body rises around lid'
+        above=m.moved(m.box(-500,500,-500,500,r['seam'],500),r['pose'])
+        assert r['body'].cut(r['mount_frame']).common(above).Volume<.001, 'Chamber rises around lid'
         # Four original wall-screw bores must still be present and unobstructed.
         angle=90-p['CornerAngle']/2
         length=r['wall_width']/2/m.math.cos(m.math.radians(angle))
         for sign in (-1,1):
             rotation=m.App.Rotation(m.V(0,1,0),-sign*angle)
+            placement=m.App.Placement(m.V(),rotation)
+            x0,x1=sorted((0,sign*length))
+            frame=m.box(x0,x1,-r['wall_height']/2-10,r['wall_height']/2+10,0,4)
+            frame=frame.cut(m.box(x0+8,x1-8,-r['wall_height']/2+6,r['wall_height']/2-6,-1,5))
             for y in (-r['wall_height']/2-5,r['wall_height']/2+5):
+                x=sign*length*.65
+                frame=frame.cut(m.Part.makeCylinder(2.3,6,m.V(x,y,-1)))
+                frame=frame.cut(m.Part.makeCone(2.3,4.5,2.2,m.V(x,y,1.9)))
                 bore=m.moved(m.Part.makeCylinder(2.29,6,m.V(sign*length*.65,y,-1)),m.App.Placement(m.V(),rotation))
                 assert bore.common(r['body']).Volume<.001
+            frame=m.moved(frame,placement).cut(m.box(-500,500,-500,500,-500,p['CornerSetback']))
+            assert frame.cut(r['cable_cut']).cut(r['body']).Volume<.01, 'Wall-contact frame cut away'
         if p['CableEnabled']:
             assert r['plug'].Volume>0 and r['cable_preview'].Volume>0
             assert r['body'].common(r['plug']).Volume<.01
@@ -93,6 +101,8 @@ def check_saved_outputs():
         doc=m.App.openDocument(str(m.ROOT/'output'/(name+'.FCStd')))
         p=m.read_parameters(doc)
         r=m.build(p)
+        previous=doc.SourcePCB.Placement.multiply(m.App.Placement(m.SOURCE_CENTRE,m.App.Rotation()))
+        assert (r['pose'].Base-previous.Base).Length<1e-6, 'PCB placement changed: '+name
         if not p['CompactCorner']:
             for old,new in ((doc.Mount.Shape,r['body']),(doc.Cover.Shape,r['lid'])):
                 assert old.cut(new).Volume<.001 and new.cut(old).Volume<.001, name

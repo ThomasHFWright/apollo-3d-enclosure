@@ -372,8 +372,8 @@ def build(p):
             projection=App.Placement(V(),App.Rotation(n,V(0,0,1)).multiply(rotation))
             low=min(moved(shape,projection).BoundBox.ZMin for shape in envelope)
             limits.append(plate+wall-low)
-        # Keep complete mounting-screw bearing pads behind the lid seating
-        # plane. Unused frame corners may be trimmed instead of adding depth.
+        # Keep mounting-screw bearing pads behind the lid seating plane.
+        # The uncut wall-contact frame may extend beyond it beside the chamber.
         front_normal=rotation.multVec(V(0,0,1))
         projection=App.Placement(V(),App.Rotation(front_normal,V(0,0,1)))
         length=bw/2/math.cos(math.radians(angle))
@@ -563,10 +563,6 @@ def build(p):
         for x in (-bw/2+5,bw/2-5):
             for y in (-mount_y+5,mount_y-5):
                 screws += [Part.makeCylinder(2.3,6,V(x,y,-1)),Part.makeCone(2.3,4.5,2.2,V(x,y,1.9))]
-    if compact:
-        base=base.cut(front_cut)
-        if any(pad.cut(base).Volume>.001 for pad in screw_pads):
-            raise ValueError('Lid-plane trim removes mounting-screw bearing material')
     body=fuse([body,base]).cut(fuse(screws))
     if local(holder).cut(nut_access_shape).cut(body).Volume>.01:
         raise ValueError('Chamber does not fully support the rigid PCB rim')
@@ -755,11 +751,13 @@ def build(p):
                 if plug.common(obstacle).Volume > .01:
                     raise ValueError("Compact corner plug clearance is obstructed; increase chamber depth or adjust route")
     if compact:
-        if body.common(front_cut).Volume>.001:
-            raise ValueError('Body extends beyond the lid seating plane')
+        if body.cut(base).common(front_cut).Volume>.001:
+            raise ValueError('Chamber extends beyond the lid seating plane')
         bearings=Part.makeCompound(screw_pads).cut(fuse(screws))
         if bearings.cut(body).Volume>.01:
             raise ValueError('Mounting-screw bearing material was removed')
+        if base.cut(fuse(screws)).cut(cable_cut).cut(body).Volume>.01:
+            raise ValueError('Wall-contact frame material was removed')
     if body.common(lid).Volume > .01:
         raise ValueError("Cover and body overlap")
     if cable_enabled and body.common(cable_preview).Volume > .01:
@@ -767,7 +765,7 @@ def build(p):
     return dict(corner_depth_saving=original_centre.z-centre.z,body=body,lid=lid,reserved=reserved,plug=plug,path=path,passage=passage,cable_preview=cable_preview,pose=pose,seam=seam,
                 ceiling=ceiling+p["FrontSkin"],radius=radius,contacts=contacts,end_contacts=end_contacts,retention=feet+keepers,
                 rear_vents=rear_vents,actual_entry_depth=end.z-rear_front,actual_tangent_length=handle,
-                rear_front=rear_front,wall_width=bw,wall_height=bh,vent_tools=all_vents,
+                rear_front=rear_front,wall_width=bw,wall_height=bh,vent_tools=all_vents,mount_frame=base,
                 nut_access=nut_access_shape,co2_cut=local(co2_local),
                 nut_vent_keepout=Part.makeCompound(pocket_panels),
                 cable_vent_keepout=cable_guard,
