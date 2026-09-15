@@ -1,6 +1,6 @@
 """Corner nesting regression: python test_compact_corner.py (FreeCAD required)."""
 import build_mount as m
-from test_mount import check_co2_relief, check_end_rails, check_cable_rim
+from test_mount import check_co2_relief, check_end_rails, check_cable_rim, check_nut_hoods
 
 
 def check():
@@ -17,10 +17,17 @@ def check():
                     dict(Yaw=39.,Pitch=4.,CableEnabled=True),
                     dict(Yaw=0.,Pitch=15.,CableEnabled=False),
                     dict(Yaw=-70.,Pitch=10.,CableEnabled=False),
+                    dict(Yaw=-90.,Pitch=0.,CableEnabled=False),
+                    dict(Yaw=90.,Pitch=0.,CableEnabled=False),
                     dict(Yaw=-39.,Pitch=4.,CornerAngle=110.,CableEnabled=False)):
         p=dict(saved,**changes);p['CompactCorner']=True
         r=m.build(p)
         assert r['corner_depth_saving']>0
+        # Nesting must not add a panel across the open back of the corner frame.
+        # Stay near the setback: at 90 degrees the PCB rim legitimately reaches
+        # into the front of the corner cavity and must remain supported there.
+        rear=m.box(-1,1,-5,5,p['CornerSetback']+4.1,p['CornerSetback']+6.)
+        assert rear.common(r['body']).Volume<.001
         lid=m.moved(r['lid'],r['pose'].inverse())
         assert lid.cut(old_lid).Volume<.001 and old_lid.cut(lid).Volume<.001
         assert r['contacts']==base['contacts'] and r['end_contacts']==base['end_contacts']
@@ -28,6 +35,7 @@ def check():
             assert a.cut(b).Volume<.001 and b.cut(a).Volume<.001
         check_co2_relief(p,r)
         check_end_rails(r)
+        check_nut_hoods(p,r)
         for shape in (r['body'],r['lid']):
             shape.check(True)
             assert len(shape.Solids)==1 and m.closed_mesh(shape).isSolid()
@@ -69,6 +77,31 @@ def check_extra_depth():
     print('PASS depth adjustment: +5 mm input adds exactly 5 mm forward clearance',flush=True)
 
 
+def check_saved_outputs():
+    from pathlib import Path
+    from tempfile import TemporaryDirectory
+    for name in ('flat/apollo-mount','corner/apollo-mount','custom/apollo-mount',
+                 'yaw90/apollo-mount','yaw_minus90/apollo-mount','Final-prints/entrance',
+                 'compact-corner-poe/apollo-mount'):
+        doc=m.App.openDocument(str(m.ROOT/'output'/(name+'.FCStd')))
+        p=m.read_parameters(doc)
+        r=m.build(p)
+        if not p['CompactCorner']:
+            for old,new in ((doc.Mount.Shape,r['body']),(doc.Cover.Shape,r['lid'])):
+                assert old.cut(new).Volume<.001 and new.cut(old).Volume<.001, name
+        check_co2_relief(p,r)
+        check_end_rails(r)
+        check_nut_hoods(p,r)
+        check_cable_rim(r)
+        with TemporaryDirectory() as folder:
+            m.parameters(doc,p)
+            m.export(doc,p,r,Path(folder))  # Both meshes, bed placement and A1 bounds.
+        assert m.read_parameters(doc)==p
+        m.App.closeDocument(doc.Name)
+        print('PASS saved output',name,flush=True)
+
+
 if __name__=='__main__':
     check()
     check_extra_depth()
+    check_saved_outputs()

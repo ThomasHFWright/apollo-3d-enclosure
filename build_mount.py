@@ -461,6 +461,11 @@ def build(p):
     body.check(True)
     holder=Part.Face(rectangle(-ox,ox,oy0,oy1,grip_back,p['CornerRadius'])).extrude(V(0,0,seam-grip_back))
     holder=holder.cut(box(-ix,ix,iy0,iy1,grip_back-1,seam+1))
+    if compact:
+        # The original corner frame already supplies the wall-contact material.
+        # Open the nested shell behind it, retaining end caps and screw supports.
+        rear_opening=box(-500,500,-bh/2+plate,bh/2-plate,-500,rear_z)
+        body=body.cut(rear_opening.cut(local(holder)))
     # A pocket's enlarged guard must not leave tabs on neighbouring panels
     # that the pocket never pierces. Vents only cut within these panel slabs.
     pocket_panels=[]
