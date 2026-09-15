@@ -60,6 +60,22 @@ The five preset folders also contain `body.step` and `assembly.step` for CAD edi
 
 The STLs contain printable parts only. Native `.FCStd` documents include the original PCB as a visible guide. Orange clearance objects are simplified space reservations, not detailed models of the missing modules.
 
+## More example views
+
+### Corridor corner mount
+
+![Corridor corner mount with 39-degree left yaw and 4-degree downward pitch](docs/images/corridor.png)
+
+The saved [corridor example](output/Final-prints/entrance.FCStd): **Yaw −39°, Pitch +4°**, 90° inside corner, requested rear chamber 1 mm and cable disabled.
+
+### Flat wall, facing right and slightly downward
+
+![Flat-wall mount facing 70 degrees right with 10-degree downward pitch](docs/images/flat-yaw70.png)
+
+Rendered from the flat preset with **Yaw +70° and Pitch +10°**, retaining its 30 mm requested rear chamber and enabled cable routing. To make this version, open the flat CAD example in FreeCAD, change those two parameters and run the macro. Use −70° yaw to face the other way.
+
+Both views show the assembled body and shared lid. PCB and cable reference objects are hidden to make the enclosure shape clear.
+
 ## How it works
 
 `build_mount.py` calls FreeCAD's native Python geometry API: create solids, join them, subtract vents and clearances, then validate and export. Qhull's `qconvex` constructs the rear chamber envelope. No FreeCAD MCP server is required.
