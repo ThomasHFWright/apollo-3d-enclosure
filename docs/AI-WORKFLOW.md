@@ -1,6 +1,12 @@
 # Changing this design with AI
 
-## What the AI needs
+## Start with parameters in FreeCAD
+
+For routine changes to angle, fit, cable routing or fasteners, use the [FreeCAD workflow](FREECAD.md): edit **Parameters → Data**, then run **Rebuild.FCMacro through Macro → Macros… → Execute**. An AI can help choose values or explain an error while you perform these steps. You do not need an AI with terminal access just to get advice on parameter values.
+
+Use source edits when the desired feature is not covered by existing parameters. The Python and command-line recipes below are advanced alternatives for development or explicit automation requests.
+
+## What the AI needs for source changes
 
 Use an assistant that can read/edit the cloned repository and run local terminal commands. FreeCAD and Qhull must be installed on that computer. A FreeCAD MCP server is **not required**: the generator calls FreeCAD's Python API directly. An assistant without file/terminal access can propose a patch, but cannot claim to have built or tested it.
 
@@ -8,11 +14,11 @@ Start by asking it to read `README.md`, `AGENTS.md`, `docs/PARAMETERS.md`, `buil
 
 ### Example: another installation, no design change
 
-> Open `output/corner/apollo-mount.FCStd` and read its complete saved parameter set. Create a new version with Yaw=-25, Pitch=8 and RearChamberDepth=20. Preserve all other settings, including clearances and screw sizes. Write the results to `output/study-corner`, preserving my existing models. Use the FreeCAD Python generator, validate the resulting body/lid and exported meshes, and report the actual wall clearance. Do not send a print.
+> I'm editing `output/corner/apollo-mount.FCStd` in FreeCAD. Guide me through setting Yaw=-25, Pitch=8 and RearChamberDepth=20 in Parameters → Data while preserving all other settings. Then explain how to execute Rebuild.FCMacro inside FreeCAD, inspect the result and copy output/custom to output/study-corner so I can keep it. Use the existing parameters rather than changing Python defaults.
 
 ### Example: change the physical design
 
-> Read this repository's AI and parameter guides. On `output/custom/apollo-mount.FCStd`, enlarge the CO2 holder notch by 0.2 mm on each side, keeping the outer wall, PCB contact surfaces elsewhere, cover and screw seats intact. Prefer the existing CO2ReliefClearance parameter. Preserve every other saved value. Export a new named version, run the relevant clearance checks, and show the changed area before I print a fit sample.
+> Read this repository's parameter guide. I want to enlarge the CO2 holder notch by 0.2 mm on each side. Help me identify the current CO2ReliefClearance value in FreeCAD and increase it by 0.2, preserving every other value. Walk me through running Rebuild.FCMacro from FreeCAD and checking the outer wall and PCB support remain intact before printing a fit sample.
 
 ### Example: add a new capability
 
@@ -40,7 +46,26 @@ OpenCascade solid operations in FreeCAD include boxes, cylinders, lofts, offset 
 
 Manual edits to generated Mount/Cover solids will be overwritten by the next rebuild. Implement persistent changes in the generator or its parameter inputs.
 
-## Preserve a saved model from Python
+## Advanced command-line builds
+
+The normal parameter-editing workflow remains inside FreeCAD. For automation, clone the repository or use the extracted ZIP:
+
+```sh
+git clone https://github.com/ThomasHFWright/apollo-3d-enclosure.git
+cd apollo-3d-enclosure
+gzip -dk r-pro-1-pcb.obj.gz
+python -c 'import build_mount; print(build_mount.App.Version())'
+qconvex -V
+python build_mount.py --corner --set Yaw=-39 --set Pitch=4 --set RearChamberDepth=1 --set CableEnabled=false --name my-corridor
+```
+
+Terminal builds require a Python interpreter compatible with the installed FreeCAD modules and `qconvex` on PATH. The scripts add `/usr/lib/freecad/lib`; other installation layouts may require adapting that path. FreeCAD GUI builds use FreeCAD's own Python. No pip package replaces the FreeCAD installation.
+
+The compressed reference is about 13 MB and expands to about 89 MB; no Git LFS is required. New CLI documents need the decompressed OBJ; supplied CAD files already embed it.
+
+This command creates `output/my-corridor/` with CAD, STL and STEP files. Repeat `--set` for editable parameters; booleans are `true`/`false`. Choose a simple new folder name for `--name` to avoid overwriting another build. CLI builds start from **source defaults**, not the currently open or saved model. Use FreeCAD or the saved-document recipe below to preserve existing settings.
+
+## Advanced: preserve a saved model from Python
 
 Run this from the repository root using a Python compatible with FreeCAD. Choose a new destination; `export()` overwrites its named files.
 

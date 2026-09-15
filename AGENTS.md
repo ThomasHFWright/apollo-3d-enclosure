@@ -2,7 +2,8 @@
 
 Read README.md, docs/PARAMETERS.md and docs/AI-WORKFLOW.md before modifying geometry.
 
-- Use FreeCAD's Python API through build_mount.py. No MCP service is required.
+- For routine user parameter changes, lead with editing Parameters → Data in FreeCAD and executing Rebuild.FCMacro through FreeCAD's Macro menu. Reserve CLI/Python recipes for source changes or requested automation.
+- For generator development, use FreeCAD's Python API through build_mount.py. No MCP service is required.
 - Read all settings from the user's specified saved document with read_parameters(); CLI starts from defaults.
 - Preserve unrelated saved settings, especially Corner, Yaw, Pitch, RearChamberDepth, CableEnabled and fit/hardware clearances.
 - Treat Mount/Cover as generated solids. Persistent changes belong in the shared generator, not manual edits of exported meshes.

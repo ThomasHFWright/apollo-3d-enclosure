@@ -1,4 +1,6 @@
-# Change parameters and generate a new enclosure
+# Edit parameters and rebuild inside FreeCAD
+
+This is the **primary workflow** for configuring an enclosure: edit the supplied model's **Parameters → Data** values, then execute **Rebuild.FCMacro from FreeCAD's Macro menu**. Python editing and terminal build commands are only needed for advanced development or automation.
 
 ## First use
 

@@ -1,6 +1,6 @@
 # Complete parameter reference
 
-The tables cover every editable entry in `build_mount.py:PARAMETERS`. Defaults below are **generator defaults**; the value in your saved FreeCAD document is what the GUI rebuild uses. All numbers are millimetres unless marked as angles; boolean values appear as Yes/No. Edit the Data tab and **run Rebuild.FCMacro** afterwards.
+The tables cover every editable entry in `build_mount.py:PARAMETERS`. Defaults below are **generator defaults**; the value in your saved FreeCAD document is what the GUI rebuild uses. All numbers are millimetres unless marked as angles; boolean values appear as Yes/No. In FreeCAD, select **Parameters → Data**, edit the values, then choose **Macro → Macros… → Rebuild.FCMacro → Execute**. Follow the [FreeCAD walkthrough](FREECAD.md) for setup, saving versions and troubleshooting.
 
 ## Coordinates and interactions
 
