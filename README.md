@@ -1,5 +1,7 @@
 # Apollo R PRO-1 fixed-angle wall and corner enclosure
 
+**Experimental branch:** [compact corner placement](docs/COMPACT-CORNER.md). Existing examples retain their standard placement; enable CompactCorner only when testing the new layout.
+
 A community enclosure for the **Apollo Automation R PRO-1**, designed with FreeCAD and Python. Print the direction you need: the mount has no ball joint or friction-fit backplate to slip under cable load. A bolted lid retains the main PCB on segmented rails, with space and ventilation for PoE and the optional radar/CO₂ modules.
 
 ![Corner preset](docs/images/corner.png)

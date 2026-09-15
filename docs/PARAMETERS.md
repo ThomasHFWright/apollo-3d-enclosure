@@ -4,9 +4,9 @@ The tables cover every editable entry in `build_mount.py:PARAMETERS`. Defaults b
 
 ## Coordinates and interactions
 
-PCB X is left/right, Y is bottom/top, and Z points through the front cover. The PCB is 44.474688 × 56.974716 mm, 1.586157 mm thick; the rear PCB face is Z=0 and front face Z=PCB_T. PCB coordinates rotate with the device. The mounting frame remains fixed, with +Z toward the room; in corner mode its reference plane bridges the wall pads. RearChamberDepth is measured to the electronics bay, not directly to the PCB.
+PCB X is left/right, Y is bottom/top, and Z points through the front cover. The PCB is 44.474688 × 56.974716 mm, 1.586157 mm thick; the rear PCB face is Z=0 and front face Z=PCB_T. PCB coordinates rotate with the device. The mounting frame remains fixed, with +Z toward the room; in corner mode its reference plane bridges the wall pads. In standard mode, RearChamberDepth is measured to the electronics bay, not directly to the PCB; in compact mode it adds forward stand-off from the nested position.
 
-Positive pitch tilts down. Positive yaw rotates front-facing +Z toward +X. A corner mount at zero yaw faces its corner bisector. Viewing from behind reverses apparent left/right. Rotating the PCB can increase stand-off to avoid walls; it also shifts the PCB sideways. Parameters interact, so listed ranges alone do not guarantee a valid combination.
+Positive pitch tilts down. Positive yaw rotates front-facing +Z toward +X. A corner mount at zero yaw faces its corner bisector. Viewing from behind reverses apparent left/right. The experimental CompactCorner option changes the placement rule and chamber-depth datum as described below. Rotating the PCB can increase stand-off to avoid walls; it also shifts the PCB sideways. Parameters interact, so listed ranges alone do not guarantee a valid combination.
 
 When CableEnabled is No, other Cable-group inputs are ignored. Module, structural and wall checks continue. All active numeric inputs must be finite.
 
@@ -15,12 +15,13 @@ When CableEnabled is No, other Cable-group inputs are ignored. Module, structura
 | Parameter | Default | Meaning and how to use it |
 |---|---:|---|
 | `Corner` | No | Yes selects two angled wall-contact pads; No selects a flat-wall frame. Rebuild and inspect screw access after changing. |
+| `CompactCorner` | No | Experimental, corner mounts only. Yes balances the enclosure between the two walls and opens the chamber into the hollow corner. RearChamberDepth becomes extra forward stand-off from this calculated placement. Enable CableEnabled to include the provisional plug; cable-off does not reserve a plug or bend. Inspect the complete route and wall-entry needs. |
 | `CornerAngle` | 90 | 60–150°. Measure the included wall angle, not the PCB aim. 90° is a square inside corner. Validated even in flat mode. |
 | `CornerSetback` | 10 | Nonnegative. For corner mode, removes the rear tip along the bisector to clear rounded plaster. A geometry-dependent maximum protects screw material (about 17.59 mm at the default 90°/70 mm frame). 0 restores the sharp tip; ignored on flat mounts. |
 | `CornerSpine` | No | No retains 4 mm thick closures at the top/bottom only. Yes fills the same flat-backed strip over the height. Relevant only to corner mounts with nonzero setback. |
-| `Yaw` | 0 | −90 to +90°. Rotation about model Y. 0 is straight ahead for flat mounts and along the corner bisector for corner mounts. The PCB shifts sideways by half its width × sin(yaw); verify direction visually. |
+| `Yaw` | 0 | −90 to +90°. Rotation about model Y. 0 is straight ahead for flat mounts and along the corner bisector for corner mounts. Standard mode shifts the PCB sideways by half its width × sin(yaw); compact corners balance the wall clearances instead. Verify direction visually. |
 | `Pitch` | 0 | −40 to +40°. Positive tilts down, negative tilts up. Combined with yaw; the geometry may move forward to avoid the wall. |
-| `RearChamberDepth` | 10 | Must be positive. Sets the rear chamber length, excluding the electronics bay. Short values can omit short vents. Rotated components may still need extra stand-off; inspect AdditionalWallClearance. It is not the full wall-to-PCB distance. |
+| `RearChamberDepth` | 10 | Must be positive. Sets the rear chamber length, excluding the electronics bay. With CompactCorner=Yes, this is extra forward stand-off from the nested position instead. Short values can omit short vents. Rotated components may still need extra stand-off; inspect AdditionalWallClearance. It is not the full wall-to-PCB distance. |
 
 ## Clearances
 
@@ -100,8 +101,9 @@ These update on a successful rebuild/export; change the driving inputs instead. 
 | Property | Meaning / driving inputs |
 |---|---|
 | `BoardDistance` | Actual PCB-centre Z offset ahead of the rear mounting-frame front plane, including bay depth and added wall clearance. Driven by RearChamberDepth, module dimensions and orientation. |
-| `PCBOffsetX` | Automatic sideways shift = 44.474688 / 2 × sin(Yaw); about ±22.24 mm at ±90°. |
-| `AdditionalWallClearance` | Extra forward stand-off needed to keep rotated geometry clear of the wall(s). Already included in BoardDistance. |
+| `PCBOffsetX` | Standard mode: 44.474688 / 2 × sin(Yaw). Compact corners instead balance the two wall-clearance bounds, which can shift the PCB in the opposite direction. |
+| `AdditionalWallClearance` | Standard-mode extra forward stand-off, included in BoardDistance. Zero in compact mode because that mode calculates placement directly. |
+| `CornerDepthSaving` | Reduction in forward PCB position versus standard placement with the same inputs. Positive means closer along the corner bisector; it is not the perpendicular distance to either wall. Zero outside compact mode. |
 | `WallPlateWidth` | Nominal plate width, default 70 mm; depends on enclosure width, not automatically enlarged for yaw/pitch. |
 | `WallPlateHeight` | Plate height including mounting ears, default 108 mm. |
 | `NutPocketAcrossFlats` | Nominal nut width + NutClearance: M3 default 5.9 mm; M2 default 4.4 mm. |

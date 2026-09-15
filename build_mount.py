@@ -37,6 +37,7 @@ END_EDGE_BANDS = {("rear",-1):[(-6.025,5.975),(12.602,13.002)],
 # cable dimensions are explicitly adjustable starting assumptions.
 PARAMETERS = [
     ("Corner", False, "Mount", "Inside-corner base instead of flat wall"),
+    ("CompactCorner", False, "Mount", "Experimental: nest the electronics bay into the corner; RearChamberDepth adds forward stand-off"),
     ("CornerAngle", 90., "Mount", "Included angle between the two walls"),
     ("CornerSetback", 10., "Mount", "Trim corner tip forward along the wall-angle bisector to clear rounded plaster; 0 restores the tip; ignored for flat walls"),
     ("CornerSpine", False, "Mount", "Extend flat corner closure continuously from top to bottom; No closes only the end gaps"),
@@ -350,11 +351,39 @@ def build(p):
     centre=V(W/2*math.sin(math.radians(p['Yaw'])),0,rear_front+board_distance(p))
     for n in wall_normals:
         centre.z+=max(0.,max(plate+wall-n.dot(centre+q) for q in rigid_points)/n.z)
+    original_centre=V(centre)
+    compact=p['Corner'] and p.get('CompactCorner',False)
+    if compact:
+        # Separate the shallow screw housings from the taller cover and rear bay.
+        envelope=[box(-ox,ox,oy0,oy1,neck,ceiling+p['FrontSkin'])]
+        envelope += [Part.makeCylinder(4.5,6.5+3.2+head_depth,V(sign*(ox+3),y,seam-6.5))
+                     for sign in (-1,1) for y in (p['LowerContactY'],p['UpperContactY'])]
+        # Cable-off retains its existing meaning: no plug/routing constraints.
+        if cable_enabled:
+            envelope.append(box(p['PortX']-p['PlugWidth']/2,p['PortX']+p['PlugWidth']/2,
+                                p['PortY']-p['PlugHeight']/2,p['PortY']+p['PlugHeight']/2,
+                                -p['RearHeight']-p['PlugLength'], -p['RearHeight']))
+        # Project exact cylinder/box bounds in each wall-normal direction.
+        limits=[]
+        for n in wall_normals:
+            projection=App.Placement(V(),App.Rotation(n,V(0,0,1)).multiply(rotation))
+            low=min(moved(shape,projection).BoundBox.ZMin for shape in envelope)
+            limits.append(plate+wall-low)
+        a,b=wall_normals
+        centre.x=(limits[0]-limits[1])/(a.x-b.x)
+        centre.z=(limits[0]-a.x*centre.x)/a.z+p['RearChamberDepth']
     pose=App.Placement(centre,rotation)
     local=lambda s:moved(s,pose)
     points=[V(x,y,rear_z-1) for x in (-bw/2+plate,bw/2-plate) for y in (-bh/2+plate,bh/2-plate)]
     points += [pose.multVec(V(x,y,z)) for x in (-ix,ix) for y in (iy0,iy1)
                for z in (-p['RearHeight']-p['RearClearance'],seam+1)]
+    if compact:
+        # Use the hollow corner behind the old flat mounting-frame plane.
+        back=max(p['CornerSetback']+plate+wall,(plate+wall)/wall_normals[0].z+.1)
+        reach=(back-(plate+wall)/wall_normals[0].z)/math.tan(math.radians(angle))
+        points += [V(x,y,back) for x in (-reach,reach) for y in (-bh/2+plate,bh/2-plate)]
+        if cable_enabled:
+            points += [pose.multVec(v.Point) for v in envelope[-1].Vertexes]
     inner=convex_envelope(points)
     # Offset planar walls, then round the outside. This keeps real circular
     # corners without forcing all chamber sections to have matching rectangles.
@@ -366,7 +395,11 @@ def build(p):
     # approximation tolerance. Preserve their small arcs at kernel precision.
     if radius:outer=outer.makeOffsetShape(radius,1e-7,join=0)
     front_cut=local(box(-500,500,-500,500,seam,500))
-    outer=outer.cut(front_cut).common(box(-500,500,-500,500,rear_z,500))
+    def rear_clip(shape):
+        if compact:
+            return shape.cut(Part.makeCompound(wall_voids)).common(box(-500,500,-500,500,p['CornerSetback'],500))
+        return shape.common(box(-500,500,-500,500,rear_z,500))
+    outer=rear_clip(outer.cut(front_cut))
     mount_y = bh/2+10  # Exposed mounting ears keep wall-screw access outside the cage.
     chamber_faces=inner.Faces
     hoods=[]
@@ -409,7 +442,7 @@ def build(p):
             # Broad circular hood bases used to poke through the neighbouring
             # top panel as two oval bumps. Match the pocket's flat end limits.
             hood=local(hood.common(box(-500,500,oy0,oy1,-500,500)))
-            hoods.append(hood.common(box(-500,500,-500,500,rear_z,500)).cut(Part.makeCompound(wall_voids)))
+            hoods.append(rear_clip(hood).cut(Part.makeCompound(wall_voids)))
             # Extend only the vent keep-out behind the access mouth, leaving
             # a rim in the chamber wall rather than a slot touching its edge.
             guard_extension=extension+wall
@@ -677,11 +710,21 @@ def build(p):
         for wall_void in wall_voids:
             if shape.common(wall_void).Volume > .01:
                 raise ValueError(f"{label} enters wall; change angle/distance")
+    if compact:
+        # Reusing corner space must not bury electronics or the connector in
+        # the wall/plate. Existing final body checks also catch closed end caps.
+        for wall_void in wall_voids:
+            if reserved.common(wall_void).Volume > .01:
+                raise ValueError("Compact corner module envelope enters wall")
+        if cable_enabled:
+            for obstacle in [body,lid]+wall_voids:
+                if plug.common(obstacle).Volume > .01:
+                    raise ValueError("Compact corner plug clearance is obstructed; increase chamber depth or adjust route")
     if body.common(lid).Volume > .01:
         raise ValueError("Cover and body overlap")
     if cable_enabled and body.common(cable_preview).Volume > .01:
         raise ValueError("Cable route still intersects material after vent/cut processing; adjust the route")
-    return dict(body=body,lid=lid,reserved=reserved,plug=plug,path=path,passage=passage,cable_preview=cable_preview,pose=pose,seam=seam,
+    return dict(corner_depth_saving=original_centre.z-centre.z,body=body,lid=lid,reserved=reserved,plug=plug,path=path,passage=passage,cable_preview=cable_preview,pose=pose,seam=seam,
                 ceiling=ceiling+p["FrontSkin"],radius=radius,contacts=contacts,end_contacts=end_contacts,retention=feet+keepers,
                 rear_vents=rear_vents,actual_entry_depth=end.z-rear_front,actual_tangent_length=handle,
                 rear_front=rear_front,wall_width=bw,wall_height=bh,vent_tools=all_vents,
@@ -728,8 +771,9 @@ def export(doc,p,result,folder,gui=False,preview=False):
     folder.mkdir(parents=True,exist_ok=True)
     doc.Parameters.BoardDistance=result['pose'].Base.z-result['rear_front']
     for name,value,description in (
-        ('PCBOffsetX',result['pose'].Base.x,'Automatic sideways shift: half PCB width times sine of yaw'),
-        ('AdditionalWallClearance',doc.Parameters.BoardDistance-board_distance(p),'Extra stand-off needed to keep the rotated enclosure clear of physical walls'),
+        ('PCBOffsetX',result['pose'].Base.x,'PCB centre X in mounting frame; compact corners balance the two wall clearances'),
+        ('CornerDepthSaving',result['corner_depth_saving'],'Forward-depth reduction versus standard placement at the same parameters; positive is closer to corner'),
+        ('AdditionalWallClearance',0. if p['Corner'] and p.get('CompactCorner',False) else doc.Parameters.BoardDistance-board_distance(p),'Standard-placement extra stand-off; zero in compact mode, which calculates placement directly'),
         ('WallPlateWidth',result['wall_width'],'Nominal wall-plate width; does not grow with yaw or pitch'),
         ('WallPlateHeight',result['wall_height']+20,'Calculated wall-plate height including screw ears')):
         if name not in doc.Parameters.PropertiesList:
