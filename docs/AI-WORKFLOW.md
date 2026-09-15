@@ -22,7 +22,7 @@ Start by asking it to read `README.md`, `AGENTS.md`, `docs/PARAMETERS.md`, `buil
 
 ### Example: add a new capability
 
-> Add [specific feature] to the shared generator. Trace how it affects the body, cover, fit ring, references and exports. Keep existing parameter values compatible. Add an exposed setting only if users need to configure it. Update the parameter guide and add a small regression check that catches the original problem. Validate flat, corner and the affected extreme-angle examples. Regenerate only the agreed outputs after checking them.
+> Add [specific feature] to the shared generator. Trace how it affects the body, cover, references and exports. Keep existing parameter values compatible. Add an exposed setting only if users need to configure it. Update the parameter guide and add a small regression check that catches the original problem. Validate flat, corner and the affected extreme-angle examples. Regenerate only the agreed outputs after checking them.
 
 Supply measured dimensions, the PCB face used as a datum, a photo with the relevant feature marked, desired units, and the physical purpose. Avoid requests such as “make it stronger” without identifying a load, a weak feature or a observed failure.
 
@@ -34,7 +34,7 @@ Supply measured dimensions, the PCB face used as a datum, a photo with the relev
 | `defaults()` / `read_parameters()` | New-build defaults and saved-document values/legacy migration |
 | `build()` | Solid construction, orientation, chamber, rails, screws, ventilation and cable geometry; validates the result |
 | `parameters()` | Creates/updates FreeCAD editable and calculated properties |
-| `export()` | Updates native objects; creates oriented STL/STEP and optional fit ring; saves the CAD document |
+| `export()` | Updates native objects; creates oriented body/lid STL/STEP; saves the CAD document |
 | `main()` | CLI arguments or active GUI-document workflow |
 | `Rebuild.FCMacro` | Runs the generator and presents success/failure in FreeCAD |
 | `prepare_reference.py` | Imports the upstream multi-object PCB mesh into a reference document |
@@ -102,7 +102,7 @@ test_mount.check_co2_relief(p, result)
 ```
 
 5. For wider generator changes, run `python test_mount.py`. Run `python test_lid_thickness.py` when the cover changes. For a small parameter adjustment, the generator/export checks and relevant fit checks are more useful than blindly running every historical simulation.
-6. Inspect rendered views or the native FreeCAD model. Confirm clearances, connected material around cutouts, reinforcement and references. Verify both body and cover, plus the fit-ring slice.
+6. Inspect rendered views or the native FreeCAD model. Confirm clearances, connected material around cutouts, reinforcement and references. Verify both body and cover.
 7. Slice for the actual printer and orientation. Review the first unsupported layer under each large span, not just the final support silhouette.
 8. Report what was changed, which tests passed, what was actually printed, and what remains provisional. A screenshot or low FEM stress alone is not evidence of a successful physical fit or long-term heat resistance.
 

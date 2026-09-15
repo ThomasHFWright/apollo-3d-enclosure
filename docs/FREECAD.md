@@ -47,8 +47,7 @@ The macro saves and writes the following into `output/custom/`, overwriting matc
 |---|---|
 | `apollo-mount.FCStd` | Editable inputs, native solids and reference objects |
 | `body.stl`, `lid.stl` | Individual parts oriented for slicing |
-| `fit-ring.stl` | Small optional PCB/hardware fit coupon |
-| `body.step`, `lid.step`, `fit-ring.step` | Oriented CAD solids for exchange |
+| `body.step`, `lid.step` | Oriented CAD solids for exchange |
 | `assembly.step` | Body and cover in assembled positions; no reference PCB/cable |
 
 It does **not** update an Orca project, reslice, send a print, rerun stress tests, or refresh old PNG previews. Import the new STLs or use your slicer's replace/reload feature and inspect orientation/supports again. Do not manually export all visible objects: that would risk including PCB/cable references.

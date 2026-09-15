@@ -6,7 +6,7 @@ A community enclosure for the **Apollo Automation R PRO-1**, designed with FreeC
 
 *Corner preset; the blue cable is a reference preview, not a printed tube.*
 
-**Two assembly parts:** body and lid. An optional fit ring lets you check the PCB and hardware before committing to a full body print. The front sensor window is 1.2 mm thick; actual radar performance and long-term PETG behaviour still need checking in your installation.
+**Two assembly parts:** body and lid. The front sensor window is 1.2 mm thick; actual radar performance and long-term PETG behaviour still need checking in your installation.
 
 This is an independent community project, not an official Apollo product. Thanks to [Apollo Automation](https://apolloautomation.com/products/r-pro-1) for providing the PCB and case references. See [attribution and reuse terms](ATTRIBUTION.md).
 
@@ -20,7 +20,7 @@ This is an independent community project, not an official Apollo product. Thanks
 4. Select **Parameters – edit, then run Rebuild.FCMacro** in the model tree, then the **Data** tab in the Property view.
 5. Double-click the values you want to change: for example **Yaw**, **Pitch**, **RearChamberDepth** or **CableEnabled**. Enter lengths in millimetres and angles in degrees, and press Enter to finish each edit.
 6. With that model's tab active, open **Macro → Macros…**. Set the macro location to the extracted repository folder if necessary, select **Rebuild.FCMacro**, and click **Execute**.
-7. Wait for **“Apollo rebuilt…”** in FreeCAD's status bar/Report view, then inspect the updated model. The macro saves the new CAD and printable **body.stl**, **lid.stl** and **fit-ring.stl**, plus STEP files, in **`output/custom/`**.
+7. Wait for **“Apollo rebuilt…”** in FreeCAD's status bar/Report view, then inspect the updated model. The macro saves the new CAD and printable **body.stl** and **lid.stl**, plus STEP files, in **`output/custom/`**.
 8. Copy that output folder to a named location to keep this version, then open the new STLs in your slicer and review them before printing.
 
 **Editing a value, saving or pressing Recompute alone does not regenerate the geometry. Run the macro after changing parameters.** A successful rebuild overwrites matching files in `output/custom`, even when the source CAD file was saved elsewhere. Preserve any previous custom exports you want to keep before rebuilding. If the macro reports an error, correct it and rerun; old exports do not represent the new settings.
@@ -38,11 +38,11 @@ These values were read from each saved CAD document for this publication. Defaul
 
 | Version | Mount | Yaw / pitch | Requested rear chamber | Cable | Files |
 |---|---|---|---|---|---|
-| Flat | Flat wall | 0° / 0° | 30 mm | On | [CAD](output/flat/apollo-mount.FCStd) · [body](output/flat/body.stl) · [lid](output/flat/lid.stl) · [fit ring](output/flat/fit-ring.stl) |
-| Corner | 90° inside corner | 0° / 15° | 30 mm | On | [CAD](output/corner/apollo-mount.FCStd) · [body](output/corner/body.stl) · [lid](output/corner/lid.stl) · [fit ring](output/corner/fit-ring.stl) |
+| Flat | Flat wall | 0° / 0° | 30 mm | On | [CAD](output/flat/apollo-mount.FCStd) · [body](output/flat/body.stl) · [lid](output/flat/lid.stl) |
+| Corner | 90° inside corner | 0° / 15° | 30 mm | On | [CAD](output/corner/apollo-mount.FCStd) · [body](output/corner/body.stl) · [lid](output/corner/lid.stl) |
 | Right-facing | Flat wall | +90° / 0° | 30 mm | On | [CAD](output/yaw90/apollo-mount.FCStd) · [body](output/yaw90/body.stl) · [lid](output/yaw90/lid.stl) |
 | Left-facing | Flat wall | −90° / 0° | 30 mm | On | [CAD](output/yaw_minus90/apollo-mount.FCStd) · [body](output/yaw_minus90/body.stl) · [lid](output/yaw_minus90/lid.stl) |
-| Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) · [lid](output/custom/lid.stl) · [fit ring](output/custom/fit-ring.stl) |
+| Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) · [lid](output/custom/lid.stl) |
 | Entrance snapshot | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/Final-prints/entrance.FCStd) · [body](output/Final-prints/entrance.stl) · [lid](output/Final-prints/lid.stl) |
 
 The five preset folders also contain individual STEP solids and `assembly.step`. All corner examples have a 10 mm corner-tip setback and top/bottom closures; their middle remains open. A requested 1 mm chamber does **not** mean the PCB is 1 mm from the wall: electronics space and any additional wall clearance are separate.
@@ -67,7 +67,7 @@ The generator checks connected valid solids, reserved-component and wall collisi
 
 Additional developer tests are described in the [AI/developer guide](docs/AI-WORKFLOW.md#required-verification). The full geometry suite can take several minutes and uses the included PCB reference document and official case STEP. Optional historical FEM scripts are included; see [AI workflow / structural screening](docs/AI-WORKFLOW.md#structural-screening). They are comparative solid-material calculations, not a prediction of heat-induced creep or printed PETG service life.
 
-The supplied PCB mesh omits the plugged-in LD2450, optional LD2412 and CO₂ daughterboards. Front height 13.9 mm, rear height 16.9 mm and side overhang 1.4 mm came from physical measurements. Verify your revision with the fit ring, lid, actual nuts and Ethernet connector before printing a batch.
+The supplied PCB mesh omits the plugged-in LD2450, optional LD2412 and CO₂ daughterboards. Front height 13.9 mm, rear height 16.9 mm and side overhang 1.4 mm came from physical measurements. Verify your revision with the body, lid, actual nuts and Ethernet connector before printing a batch.
 
 ## Contribute
 

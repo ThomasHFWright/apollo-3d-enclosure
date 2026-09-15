@@ -46,10 +46,6 @@ def check_nut_hoods(p, result):
     # separately intersected curved shell can produce invalid OCC fragments.
     assert result['nut_vent_keepout'].Volume>1
     assert result['nut_vent_keepout'].common(result['vent_tools']).Volume<.01, 'Vents enter finger-hole reinforcement'
-    # A refined hood can pass OCC validity/mesh checks yet break the fit slice.
-    section=result['body'].common(m.moved(m.box(-300,300,-300,300,result['seam']-6.6,result['seam']),result['pose']))
-    probe=result['pose'].multVec(m.V(m.W/2+p['SideOverhang']+p['SideClearance']+p['WallThickness']/2,0,result['seam']-.25))
-    assert sum(s.isInside(probe,.00001,True) for s in section.Solids)==1, 'Hood geometry breaks PCB fit-ring slice'
     # At steep angles a pocket can lie entirely inside the chamber, where no
     # protruding hood is needed. The zero-yaw cases have four exposed hoods.
     if p['Yaw']!=0:return
@@ -345,6 +341,9 @@ if __name__ == "__main__":
             doc=m.App.newDocument("ExportCheck")
             m.parameters(doc,m.defaults(Yaw=30.,Pitch=30.,MinBendRadius=9.,Corner=corner))
             m.export(doc,m.read_parameters(doc),angled,Path(folder))
+            assert {f.name for f in Path(folder).iterdir()} == {
+                'body.stl', 'lid.stl', 'body.step', 'lid.step',
+                'assembly.step', 'apollo-mount.FCStd'}
             exported=m.Part.read(str(Path(folder)/"assembly.step"))
             assert len(exported.Solids)==2
             expected=angled["body"].Volume+angled["lid"].Volume

@@ -22,7 +22,7 @@ These are starting settings for that setup, not a universal PETG profile. Calibr
 
 ## Orientation and exports
 
-The generator orients the body with the PCB rim toward the bed when possible; at steep angles it switches to a wall-contact face to keep all material above the bed. The lid is exported exterior face down. The fit ring is a separate optional coupon. Check the first layer and support access in the slicer rather than assuming exported orientation is always the most economical.
+The generator orients the body with the PCB rim toward the bed when possible; at steep angles it switches to a wall-contact face to keep all material above the bed. The lid is exported exterior face down. Check the first layer and support access in the slicer rather than assuming exported orientation is always the most economical.
 
 Import `body.stl` and `lid.stl` as separate printable parts at 100% scale, in millimetres. Do not slice `SourcePCB`, the cable preview or orange clearance envelopes. Native CAD and `assembly.step` show assembled positions; individual STL/STEP exports are oriented for printing. The automated bed check is for a 256 mm cube; smaller printers need their own check.
 
@@ -37,10 +37,10 @@ M2 is available in the FastenerSize dropdown; change both body and lid together 
 
 ## Fit and assembly
 
-1. Print the chosen preset's **fit ring and lid** first. The fit ring is a coupon, not a third assembly part.
+1. Print the chosen preset's **body and lid**, then remove supports.
 2. With the device unpowered, check the main PCB seats freely, all daughterboards/pins clear the plastic, and the CO₂ notch reaches the inner wall without interference. Only the main PCB edges should be retained.
 3. Test nuts, bolt holes and head recesses. Adjust the relevant clearance parameters and rebuild if required; do not clamp a bent PCB into place.
-4. Print the body and remove supports. The shallow fit ring cannot check the complete finger-access pockets or cable route.
+4. Check access through the finger pockets and the complete cable route with your actual hardware.
 5. Place nuts into the rear-facing pockets through the chamber before installing the PCB. Confirm access with fingers or tweezers.
 6. Check your Ethernet male connector and boot pass through the opening and can negotiate the route. A cross-section clearance check alone does not prove a rigid connector can move around every bend. Arrange cable insertion and wall fastening while the PCB is accessible.
 7. Attach the body to the wall, seat the PCB on its ledges, and gently tighten the lid until its flanges seat. Check bolt tips and heads clear the electronics.

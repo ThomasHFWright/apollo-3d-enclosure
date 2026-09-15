@@ -38,7 +38,7 @@ When CableEnabled is No, other Cable-group inputs are ignored. Module, structura
 
 | Parameter | Default | Meaning and how to use it |
 |---|---:|---|
-| `BoardSlotGap` | 0.3 | Positive. Vertical free play above the PCB before the lid keeper contacts it. Too little can clamp the board; too much allows movement. Check the printed fit ring and lid. |
+| `BoardSlotGap` | 0.3 | Positive. Vertical free play above the PCB before the lid keeper contacts it. Too little can clamp the board; too much allows movement. Check the PCB fit between the body and lid. |
 | `RegistrationGap` | 0.3 | Positive and strictly less than EdgeBite. In-plane clearance at locating stops. Too large lets the PCB slide off its ledges. |
 | `EdgeBite` | 0.8 | Greater than 0, at most 1.2 mm. Rail overlap onto the PCB edge. More overlap is not always better: nearby components must remain clear. |
 | `EdgeReliefMargin` | 0.8 | Positive. Extra gap around mapped edge components when generating the segmented rails. Increasing it shortens supporting rail segments. |
@@ -125,5 +125,5 @@ These update on a successful rebuild/export; change the driving inputs instead. 
 - Shorten the chamber: reduce RearChamberDepth; inspect AdditionalWallClearance. Do not reduce measured module heights to force a smaller enclosure.
 - Clear rounded plaster: increase CornerSetback within its allowed range. Use CornerSpine only if a full central strip is wanted.
 - Remove the cable completely: CableEnabled = No, then rebuild. To keep the route but hide it, use Space on CablePreview instead.
-- Loosen nut fit: increase NutClearance slightly and print another fit ring. This is total across-flats allowance, unlike CO2ReliefClearance which is per side.
+- Loosen nut fit: increase NutClearance slightly and rebuild the body. This is total across-flats allowance, unlike CO2ReliefClearance which is per side.
 - Change head recesses: use measured ScrewHeadDiameter/Depth. Changing M2/M3 does not automatically measure or select a matching head.

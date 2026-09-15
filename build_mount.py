@@ -773,15 +773,6 @@ def export(doc,p,result,folder,gui=False,preview=False):
         source.ViewObject.Visibility=False
     doc.recompute()
     print_shapes=dict(body=result["body"],lid=result["lid"])
-    section=result["body"].common(moved(box(-300,300,-300,300,result["seam"]-6.6,result["seam"]),result["pose"]))
-    probe=result["pose"].multVec(V(W/2+p["SideOverhang"]+p["SideClearance"]+p["WallThickness"]/2,0,result["seam"]-.25))
-    # A tilted slice can also catch detached rear-wall pieces. The optional fit
-    # coupon is the solid containing the PCB rim, not those unrelated fragments.
-    rings=[s for s in section.Solids if s.isInside(probe,.00001,True)]
-    if len(rings)!=1:
-        raise ValueError("Could not isolate the PCB fit ring")
-    print_shapes["fit-ring"]=rings[0]
-    valid(print_shapes["fit-ring"],"Optional fit ring")
     for key,shape in print_shapes.items():
         top=result["ceiling"] if key=="lid" else result["seam"]
         orient=App.Placement(V(0,0,top),App.Rotation(V(1,0,0),180)).multiply(result["pose"].inverse())
