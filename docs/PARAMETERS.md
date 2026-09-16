@@ -4,7 +4,7 @@ The tables cover every editable entry in `build_mount.py:PARAMETERS`. Defaults b
 
 ## Coordinates and interactions
 
-PCB X is left/right, Y is bottom/top, and Z points through the front cover. The PCB is 44.474688 × 56.974716 mm, 1.586157 mm thick; the rear PCB face is Z=0 and front face Z=PCB_T. PCB coordinates rotate with the device. The mounting frame remains fixed, with +Z toward the room; in corner mode its reference plane bridges the wall pads. In standard mode, RearChamberDepth is measured to the electronics bay, not directly to the PCB; in compact mode it adds forward stand-off from the nested position.
+PCB X is left/right, Y is bottom/top, and Z points through the front cover. The PCB is 44.474688 × 56.974716 mm, 1.586157 mm thick; the rear PCB face is Z=0 and front face Z=PCB_T. PCB coordinates rotate with the device. The mounting frame remains fixed, with +Z toward the room; in corner mode its reference plane bridges the wall pads. LeftWallOffset and RightWallOffset add independent movement away from the two walls after automatic placement. They do not rotate the PCB or move the mounting frame. In standard mode, RearChamberDepth is measured to the electronics bay, not directly to the PCB; in compact mode it adds forward stand-off from the nested position.
 
 Positive pitch tilts down. Positive yaw rotates front-facing +Z toward +X. A corner mount at zero yaw faces its corner bisector. Viewing from behind reverses apparent left/right. The experimental CompactCorner option changes the placement rule and chamber-depth datum as described below. Rotating the PCB can increase stand-off to avoid walls; it also shifts the PCB sideways. Parameters interact, so listed ranges alone do not guarantee a valid combination.
 
@@ -22,6 +22,8 @@ When CableEnabled is No, other Cable-group inputs are ignored. Module, structura
 | `Yaw` | 0 | −90 to +90°. Rotation about model Y. 0 is straight ahead for flat mounts and along the corner bisector for corner mounts. Standard mode shifts the PCB sideways by half its width × sin(yaw); compact corners balance the wall clearances instead. Verify direction visually. |
 | `Pitch` | 0 | −40 to +40°. Positive tilts down, negative tilts up. Combined with yaw; the geometry may move forward to avoid the wall. |
 | `RearChamberDepth` | 10 | Must be positive. Sets the rear chamber length, excluding the electronics bay. With CompactCorner=Yes, this is extra forward stand-off from the nested position instead. Short values can omit short vents. Rotated components may still need extra stand-off; inspect AdditionalWallClearance. It is not the full wall-to-PCB distance. |
+| `LeftWallOffset` | 0 | Nonnegative extra perpendicular distance from the left wall, viewed facing into the corner. Moves the complete PCB/lid assembly parallel to the right wall, keeping its distance from that wall fixed. Applies to standard and compact corners; ignored for flat walls. |
+| `RightWallOffset` | 0 | Nonnegative extra perpendicular distance from the right wall, viewed facing into the corner. Moves the assembly parallel to the left wall, keeping its distance from that wall fixed. 0 restores the calculated position. Applies to both corner modes; ignored for flat walls. |
 
 ## Clearances
 
@@ -100,9 +102,9 @@ These update on a successful rebuild/export; change the driving inputs instead. 
 
 | Property | Meaning / driving inputs |
 |---|---|
-| `BoardDistance` | Actual PCB-centre Z offset ahead of the rear mounting-frame front plane, including bay depth and added wall clearance. Driven by RearChamberDepth, module dimensions and orientation. |
-| `PCBOffsetX` | Standard mode: 44.474688 / 2 × sin(Yaw). Compact corners instead balance the two wall-clearance bounds, which can shift the PCB in the opposite direction. |
-| `AdditionalWallClearance` | Standard-mode extra forward stand-off, included in BoardDistance. Zero in compact mode because that mode calculates placement directly. |
+| `BoardDistance` | Actual PCB-centre Z offset ahead of the rear mounting-frame front plane, including bay depth, added wall clearance and the forward component of LeftWallOffset/RightWallOffset. Driven by those offsets, RearChamberDepth, module dimensions and orientation. |
+| `PCBOffsetX` | Standard mode: 44.474688 / 2 × sin(Yaw). Compact corners instead balance the two wall-clearance bounds, which can shift the PCB in the opposite direction. Both corner modes then include the sideways component of LeftWallOffset/RightWallOffset. |
+| `AdditionalWallClearance` | Automatic standard-mode extra forward stand-off, included in BoardDistance; excludes the manual wall offsets. Zero in compact mode because that mode calculates placement directly. |
 | `CornerDepthSaving` | Reduction in forward PCB position versus standard placement with the same inputs. Positive means closer along the corner bisector; it is not the perpendicular distance to either wall. Zero outside compact mode. |
 | `WallPlateWidth` | Nominal plate width, default 70 mm; depends on enclosure width, not automatically enlarged for yaw/pitch. |
 | `WallPlateHeight` | Plate height including mounting ears, default 108 mm. |
@@ -124,6 +126,7 @@ These update on a successful rebuild/export; change the driving inputs instead. 
 ## Common changes
 
 - Aim along a corridor: edit Yaw and Pitch; confirm direction in 3D. A target 6.2 m away, 0.62 m from the side wall and 0.45 m below the sensor gives approximately −39° yaw / +4° pitch for the illustrated 90° corner arrangement. Mirrored installations can require the opposite yaw sign.
+- Slide within a corner: increase LeftWallOffset or RightWallOffset independently. At a 90° corner, a 5 mm offset moves 3.536 mm sideways and 3.536 mm forward, adding exactly 5 mm perpendicular distance from the selected wall. The other wall distance stays fixed. Both offsets at 5 mm move 7.071 mm forward with no sideways movement. Keep them at 0 to retain the previous position. Large offsets can still fail enclosure/lid/fastener fit checks; offsets never silently reposition the assembly to compensate.
 - Shorten the chamber: reduce RearChamberDepth; inspect AdditionalWallClearance. Do not reduce measured module heights to force a smaller enclosure.
 - Clear rounded plaster: increase CornerSetback within its allowed range. Use CornerSpine only if a full central strip is wanted.
 - Remove the cable completely: CableEnabled = No, then rebuild. To keep the route but hide it, use Space on CablePreview instead.

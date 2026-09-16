@@ -31,7 +31,7 @@ The FreeCAD documents, STEP files, PCB reference and scripts are for editing or 
 2. Download this whole repository using **Code → Download ZIP** and extract it. Keep `Rebuild.FCMacro` beside `build_mount.py`.
 3. In FreeCAD, use **File → Open** to open a supplied `.FCStd`, such as `output/corner/apollo-mount.FCStd`. Use **File → Save As** for a working copy if you want to preserve the preset.
 4. Select **Parameters – edit, then run Rebuild.FCMacro** in the model tree, then the **Data** tab in the Property view.
-5. Double-click the values you want to change: for example **Yaw**, **Pitch**, **RearChamberDepth** or **CableEnabled**. Enter lengths in millimetres and angles in degrees, and press Enter to finish each edit.
+5. Double-click the values you want to change: for example **Yaw**, **Pitch**, **RearChamberDepth** or **CableEnabled**. Corner mounts also have **LeftWallOffset** and **RightWallOffset** for independent movement away from either wall; run the macro once to add them to older documents. Enter lengths in millimetres and angles in degrees, and press Enter to finish each edit.
 6. With that model's tab active, open **Macro → Macros…**. Set the macro location to the extracted repository folder if necessary, select **Rebuild.FCMacro**, and click **Execute**.
 7. Wait for **“Apollo rebuilt…”** in FreeCAD's status bar/Report view, then inspect the updated model. The macro saves the new CAD and printable **body.stl** and **lid.stl**, plus STEP files, in **`output/custom/`**.
 8. Copy that output folder to a named location to keep this version, then open the new STLs in your slicer and review them before printing.

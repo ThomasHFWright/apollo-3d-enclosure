@@ -44,6 +44,8 @@ PARAMETERS = [
     ("Yaw", 0., "Mount", "Facing angle: positive turns the sensor toward the right"),
     ("Pitch", 0., "Mount", "Positive tilts the sensor downward"),
     ("RearChamberDepth", 10., "Mount", "Mounting-frame front plane to centre of electronics-bay rear rim; excludes the PCB/modules bay"),
+    ("LeftWallOffset", 0., "Mount", "Extra mm away from the left wall, viewed facing into the corner; slides parallel to the right wall; corner mounts only"),
+    ("RightWallOffset", 0., "Mount", "Extra mm away from the right wall, viewed facing into the corner; slides parallel to the left wall; corner mounts only"),
     ("FrontHeight", 13.9, "Clearances", "PCB front face to tallest module including pins"),
     ("RearHeight", 16.9, "Clearances", "PCB rear face to PoE socket opening"),
     ("SideOverhang", 1.4, "Clearances", "Reserve measured black-part overhang on both sides"),
@@ -282,6 +284,9 @@ def build(p):
             raise ValueError(f"{key} must be positive")
     if not 60 <= p["CornerAngle"] <= 150 or abs(p["Yaw"]) > 90 or abs(p["Pitch"]) > 40:
         raise ValueError("Supported geometry: corner angle 60..150 degrees, yaw -90..90, pitch -40..40")
+    for key in ('LeftWallOffset','RightWallOffset'):
+        if p.get(key,0.)<0:
+            raise ValueError(f'{key} must be nonnegative; 0 restores the calculated position')
     if not 0 < p["EdgeBite"] <= 1.2 or p["TopOverhang"] < 0 or p["SideOverhang"] < 0:
         raise ValueError("EdgeBite must be 0..1.2 mm; overhangs cannot be negative")
     if p["RegistrationGap"] >= p["EdgeBite"]:
@@ -397,6 +402,13 @@ def build(p):
         if abs(front_normal.x)>1e-9:
             centre.x+=math.copysign(extra/slope,front_normal.x)
         centre.z+=p['RearChamberDepth']
+    wall_offset=V()
+    if p['Corner']:
+        left,right=p.get('LeftWallOffset',0.),p.get('RightWallOffset',0.)
+        wall_offset=V((left-right)/(2*math.sin(math.radians(angle))),0,
+                      (left+right)/(2*math.cos(math.radians(angle))))
+        centre+=wall_offset
+        original_centre+=wall_offset  # Compare compact/standard with equal offsets.
     pose=App.Placement(centre,rotation)
     local=lambda s:moved(s,pose)
     points=[V(x,y,rear_z-1) for x in (-bw/2+plate,bw/2-plate) for y in (-bh/2+plate,bh/2-plate)]
@@ -777,7 +789,7 @@ def build(p):
         raise ValueError("Cover and body overlap")
     if cable_enabled and body.common(cable_preview).Volume > .01:
         raise ValueError("Cable route still intersects material after vent/cut processing; adjust the route")
-    return dict(corner_depth_saving=original_centre.z-centre.z,body=body,lid=lid,reserved=reserved,plug=plug,path=path,passage=passage,cable_preview=cable_preview,pose=pose,seam=seam,
+    return dict(corner_depth_saving=original_centre.z-centre.z,wall_offset=wall_offset,body=body,lid=lid,reserved=reserved,plug=plug,path=path,passage=passage,cable_preview=cable_preview,pose=pose,seam=seam,
                 ceiling=ceiling+p["FrontSkin"],radius=radius,contacts=contacts,end_contacts=end_contacts,retention=feet+keepers,
                 rear_vents=rear_vents,actual_entry_depth=end.z-rear_front,actual_tangent_length=handle,
                 rear_front=rear_front,wall_width=bw,wall_height=bh,vent_tools=all_vents,mount_frame=base,frame_bridges=frame_bridges,
@@ -814,7 +826,7 @@ def parameters(doc, values):
         setattr(obj,name,value)
         obj.setEditorMode(name,1)
     if "BoardDistance" not in obj.PropertiesList:
-        obj.addProperty("App::PropertyFloat","BoardDistance","Mount","Calculated PCB distance; edit RearChamberDepth")
+        obj.addProperty("App::PropertyFloat","BoardDistance","Mount","Calculated PCB distance; edit RearChamberDepth or corner wall offsets")
     obj.BoardDistance=board_distance(values)
     obj.setEditorMode("BoardDistance",1)
     return obj
@@ -824,9 +836,9 @@ def export(doc,p,result,folder,gui=False,preview=False):
     folder.mkdir(parents=True,exist_ok=True)
     doc.Parameters.BoardDistance=result['pose'].Base.z-result['rear_front']
     for name,value,description in (
-        ('PCBOffsetX',result['pose'].Base.x,'PCB centre X in mounting frame; compact corners balance the two wall clearances'),
+        ('PCBOffsetX',result['pose'].Base.x,'PCB centre X in mounting frame, including independent corner wall offsets'),
         ('CornerDepthSaving',result['corner_depth_saving'],'Forward-depth reduction versus standard placement at the same parameters; positive is closer to corner'),
-        ('AdditionalWallClearance',0. if p['Corner'] and p.get('CompactCorner',False) else doc.Parameters.BoardDistance-board_distance(p),'Standard-placement extra stand-off; zero in compact mode, which calculates placement directly'),
+        ('AdditionalWallClearance',0. if p['Corner'] and p.get('CompactCorner',False) else doc.Parameters.BoardDistance-board_distance(p)-result['wall_offset'].z,'Automatic standard-placement extra stand-off, excluding manual wall offsets; zero in compact mode'),
         ('WallPlateWidth',result['wall_width'],'Nominal wall-plate width; does not grow with yaw or pitch'),
         ('WallPlateHeight',result['wall_height']+20,'Calculated wall-plate height including screw ears')):
         if name not in doc.Parameters.PropertiesList:

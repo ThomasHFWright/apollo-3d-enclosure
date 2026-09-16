@@ -4,7 +4,8 @@ from test_mount import check_co2_relief, check_end_rails, check_cable_rim, check
 
 
 def check():
-    doc=m.App.openDocument(str(m.ROOT/'output/Final-prints/entrance.FCStd'))
+    # Use the flat reference; entrance.FCStd is also a user's working print.
+    doc=m.App.openDocument(str(m.ROOT/'output/flat/apollo-mount.FCStd'))
     saved=m.read_parameters(doc)
     old_pose=doc.SourcePCB.Placement.multiply(m.App.Placement(m.SOURCE_CENTRE,m.App.Rotation()))
     old_lid=m.moved(doc.Cover.Shape,old_pose.inverse())
@@ -12,7 +13,7 @@ def check():
     assert base['body'].cut(doc.Mount.Shape).Volume<.001
     assert doc.Mount.Shape.cut(base['body']).Volume<.001
     m.App.closeDocument(doc.Name)
-    assert not saved['CompactCorner']
+    saved.update(Corner=True,CompactCorner=False,RearChamberDepth=1.,LeftWallOffset=0.,RightWallOffset=0.)
     for changes in (dict(Yaw=-39.,Pitch=4.,CableEnabled=True),
                     dict(Yaw=39.,Pitch=4.,CableEnabled=True),
                     dict(Yaw=39.,Pitch=15.,CableEnabled=False),

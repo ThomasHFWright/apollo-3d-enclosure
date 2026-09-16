@@ -38,6 +38,7 @@ Supply measured dimensions, the PCB face used as a datum, a photo with the relev
 | `main()` | CLI arguments or active GUI-document workflow |
 | `Rebuild.FCMacro` | Runs the generator and presents success/failure in FreeCAD |
 | `prepare_reference.py` | Imports the upstream multi-object PCB mesh into a reference document |
+| `test_wall_offsets.py` | Independent corner-wall offsets, unchanged frame/lid and printable exports |
 | `test_mount.py` | Geometry, retention, routing and export checks |
 | `test_lid_thickness.py` | Compares the actual cover skin with the supplied Apollo front case |
 | `test_strength.py`, `compare_corner_strength.py` | Optional structural screening; not part of normal rebuilds |
