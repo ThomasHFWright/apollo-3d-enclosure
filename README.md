@@ -60,7 +60,7 @@ These values were read from each saved CAD document for this publication. Saved 
 | Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) |
 | Entrance snapshot | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/Final-prints/entrance.FCStd) · [body](output/Final-prints/entrance.stl) |
 
-The custom corridor uses CompactCorner=Yes and RightWallOffset=12 mm; the entrance snapshot uses CompactCorner=Yes and both wall offsets at 0. The flat, corner and ±90° presets retain standard placement.
+The custom corridor and entrance snapshot use CompactCorner=Yes, LeftWallOffset=0 mm and RightWallOffset=12 mm. The flat, corner and ±90° presets retain standard placement.
 
 The five preset folders also contain `body.step` and `assembly.step` for CAD editing. The shared lid is available as [STEP](output/lid.step) too. FreeCAD documents and assembly STEP files retain the lid in its assembled position for reference and rebuilding. All corner examples have a 10 mm corner-tip setback and top/bottom closures; their middle remains open. A requested 1 mm chamber does **not** mean the PCB is 1 mm from the wall: electronics space and any additional wall clearance are separate.
 
@@ -74,7 +74,7 @@ The STLs contain printable parts only. Native `.FCStd` documents include the ori
 
 ![Corridor corner mount with 39-degree left yaw and 4-degree downward pitch](docs/images/corridor.png)
 
-The [corridor example](output/Final-prints/entrance.FCStd) uses compact placement with **Yaw −39°, Pitch +4°**, 90° inside corner, requested rear chamber 1 mm and cable disabled.
+The [corridor example](output/Final-prints/entrance.FCStd) uses compact placement with **Yaw −39°, Pitch +4°**, 90° inside corner, requested rear chamber 1 mm, **RightWallOffset 12 mm**, LeftWallOffset 0 mm and cable disabled.
 
 ### Flat wall, facing right and slightly downward
 

@@ -116,6 +116,16 @@ These update on a successful rebuild/export; change the driving inputs instead. 
 | `ActualCableEntryDepth` | Entry depth actually used after automatic routing. Negative can require an opening behind the mount. |
 | `ActualCableTangentLength` | Bezier handle length actually used after automatic routing. |
 
+## Adjust clearance from either corner wall
+
+1. Select **Parameters → Data → Mount** in FreeCAD. Left and right are viewed facing into the corner.
+2. Increase **LeftWallOffset** to move away from the left wall while keeping the distance from the right wall fixed. Increase **RightWallOffset** for the opposite movement. Values are extra perpendicular clearance in millimetres, not total wall-to-PCB distances.
+3. Run **Macro → Macros… → Rebuild.FCMacro → Execute**, then inspect the enclosure and your connector clearance. The PCB angle and mounting frame stay fixed while the chamber adjusts.
+
+The corridor example uses **RightWallOffset = 12 mm**, **LeftWallOffset = 0 mm**, **RearChamberDepth = 1 mm**, **Yaw = −39°** and **Pitch = 4°**. At a 90° corner, that right-wall offset moves the PCB about 8.49 mm sideways and 8.49 mm forward while preserving its left-wall distance. CableEnabled is No, so the cable preview and automatic connector checks are disabled.
+
+Set either offset back to **0** to remove its extra movement. Both offsets work with standard and compact corner placement; flat-wall mounts ignore them and use **RearChamberDepth** instead. RearChamberDepth on a corner adds movement along the corner bisector, increasing clearance from both walls together.
+
 ## Legacy names and fixed dimensions
 
 - Old `BoardDistance` inputs are migrated to RearChamberDepth when reading legacy documents. Do not edit the new calculated field.
