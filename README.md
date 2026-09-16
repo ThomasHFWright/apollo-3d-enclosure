@@ -1,6 +1,6 @@
 # Apollo R PRO-1 fixed-angle wall and corner enclosure
 
-**Experimental branch:** [compact corner placement](docs/COMPACT-CORNER.md). Existing examples retain their standard placement; enable CompactCorner only when testing the new layout.
+**Compact corner placement and independent wall offsets are included:** see the [corner guide](docs/COMPACT-CORNER.md). Each example retains its saved mounting settings.
 
 A community enclosure for the **Apollo Automation R PRO-1**, designed with FreeCAD and Python. Print the direction you need: the mount has no ball joint or friction-fit backplate to slip under cable load. A bolted lid retains the main PCB on segmented rails, with space and ventilation for PoE and the optional radar/CO₂ modules.
 
@@ -17,7 +17,7 @@ This is an independent community project, not an official Apollo product. Thanks
 1. Download the **[shared lid.stl](output/lid.stl)**.
 2. Choose **one body STL** from the examples below, or generate a body with your own angles in FreeCAD.
 
-The default requested rear chamber is **10 mm**; the corridor snapshot retains its custom 1 mm depth. Cable routing is **off by default** in every downloadable example and new build. To enable the preview and intersection cutouts, set **CableEnabled = Yes** in FreeCAD and run the macro. The main image above intentionally shows this optional feature enabled.
+The default requested rear chamber is **10 mm**; the corridor snapshot retains its custom 1 mm depth. Cable routing is **off by default** in the main examples and new builds. The separately linked compact PoE demonstration has it enabled to illustrate the route. To enable the preview and intersection cutouts, set **CableEnabled = Yes** in FreeCAD and run the macro. The main image above intentionally shows this optional feature enabled.
 
 Print one of each. The flat, corner, right-facing, left-facing and corridor downloads are **alternative examples of the body**, not extra parts to print. All supplied examples use the same lid; duplicate lid downloads have been removed from their folders.
 
@@ -31,12 +31,14 @@ The FreeCAD documents, STEP files, PCB reference and scripts are for editing or 
 2. Download this whole repository using **Code → Download ZIP** and extract it. Keep `Rebuild.FCMacro` beside `build_mount.py`.
 3. In FreeCAD, use **File → Open** to open a supplied `.FCStd`, such as `output/corner/apollo-mount.FCStd`. Use **File → Save As** for a working copy if you want to preserve the preset.
 4. Select **Parameters – edit, then run Rebuild.FCMacro** in the model tree, then the **Data** tab in the Property view.
-5. Double-click the values you want to change: for example **Yaw**, **Pitch**, **RearChamberDepth** or **CableEnabled**. Corner mounts also have **LeftWallOffset** and **RightWallOffset** for independent movement away from either wall; run the macro once to add them to older documents. Enter lengths in millimetres and angles in degrees, and press Enter to finish each edit.
+5. Double-click the values you want to change: for example **Yaw**, **Pitch**, **RearChamberDepth** or **CableEnabled**. Corner mounts also have **LeftWallOffset** and **RightWallOffset** for independent movement away from either wall; all current downloads already contain the full property set. Older personal copies gain new controls on their next rebuild. Enter lengths in millimetres and angles in degrees, and press Enter to finish each edit.
 6. With that model's tab active, open **Macro → Macros…**. Set the macro location to the extracted repository folder if necessary, select **Rebuild.FCMacro**, and click **Execute**.
 7. Wait for **“Apollo rebuilt…”** in FreeCAD's status bar/Report view, then inspect the updated model. The macro saves the new CAD and printable **body.stl** and **lid.stl**, plus STEP files, in **`output/custom/`**.
 8. Copy that output folder to a named location to keep this version, then open the new STLs in your slicer and review them before printing.
 
 **Editing a value, saving or pressing Recompute alone does not regenerate the geometry. Run the macro after changing parameters.** A successful rebuild overwrites matching files in `output/custom`, even when the source CAD file was saved elsewhere. Preserve any previous custom exports you want to keep before rebuilding. If the macro reports an error, correct it and rerun; old exports do not represent the new settings.
+
+All supplied enclosure CAD files include every editable and calculated property; no preliminary rebuild is needed to reveal controls. Run the macro after changing values to update the geometry.
 
 Existing supplied CAD files include the PCB reference, so the normal workflow above does not require decompressing the separate OBJ.
 
@@ -58,6 +60,8 @@ These values were read from each saved CAD document for this publication. Saved 
 | Custom corridor | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/custom/apollo-mount.FCStd) · [body](output/custom/body.stl) |
 | Entrance snapshot | 90° inside corner | −39° / +4° | 1 mm | Off | [CAD](output/Final-prints/entrance.FCStd) · [body](output/Final-prints/entrance.stl) |
 
+The custom corridor uses CompactCorner=Yes and RightWallOffset=12 mm; the entrance snapshot uses CompactCorner=Yes and both wall offsets at 0. The flat, corner and ±90° presets retain standard placement.
+
 The five preset folders also contain `body.step` and `assembly.step` for CAD editing. The shared lid is available as [STEP](output/lid.step) too. FreeCAD documents and assembly STEP files retain the lid in its assembled position for reference and rebuilding. All corner examples have a 10 mm corner-tip setback and top/bottom closures; their middle remains open. A requested 1 mm chamber does **not** mean the PCB is 1 mm from the wall: electronics space and any additional wall clearance are separate.
 
 `output/custom` is also the macro's working export folder and is overwritten on a successful rebuild. Copy an example you want to keep before experimenting. The entrance snapshot is kept separately as an example of that workflow.
@@ -70,7 +74,7 @@ The STLs contain printable parts only. Native `.FCStd` documents include the ori
 
 ![Corridor corner mount with 39-degree left yaw and 4-degree downward pitch](docs/images/corridor.png)
 
-The saved [corridor example](output/Final-prints/entrance.FCStd): **Yaw −39°, Pitch +4°**, 90° inside corner, requested rear chamber 1 mm and cable disabled.
+The [corridor example](output/Final-prints/entrance.FCStd) uses compact placement with **Yaw −39°, Pitch +4°**, 90° inside corner, requested rear chamber 1 mm and cable disabled.
 
 ### Flat wall, facing right and slightly downward
 

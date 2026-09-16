@@ -113,6 +113,14 @@ def check_saved_outputs():
                  'yaw90/apollo-mount','yaw_minus90/apollo-mount','Final-prints/entrance',
                  'compact-corner-poe/apollo-mount','compact-pitch15/apollo-mount'):
         doc=m.App.openDocument(str(m.ROOT/'output'/(name+'.FCStd')))
+        missing={key for key,*_ in m.PARAMETERS}-set(doc.Parameters.PropertiesList)
+        assert not missing, f'{name}: missing saved controls {missing}'
+        for key in ('BoardDistance','PCBOffsetX','AdditionalWallClearance','CornerDepthSaving',
+                    'WallPlateWidth','WallPlateHeight','NutPocketAcrossFlats','NutPocketDepth',
+                    'ScrewHoleDiameter','ScrewHeadRecessDiameter','ScrewHeadRecessDepth',
+                    'ActualCableEntryDepth','ActualCableTangentLength'):
+            assert key in doc.Parameters.PropertiesList, (name,key)
+            assert doc.Parameters.getEditorMode(key)==['ReadOnly'], (name,key)
         p=m.read_parameters(doc)
         r=m.build(p)
         previous=doc.SourcePCB.Placement.multiply(m.App.Placement(m.SOURCE_CENTRE,m.App.Rotation()))

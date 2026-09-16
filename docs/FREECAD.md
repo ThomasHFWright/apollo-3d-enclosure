@@ -2,6 +2,8 @@
 
 This is the **primary workflow** for configuring an enclosure: edit the supplied model's **Parameters → Data** values, then execute **Rebuild.FCMacro from FreeCAD's Macro menu**. Python editing and terminal build commands are only needed for advanced development or automation.
 
+Current enclosure downloads already contain all controls, including CompactCorner, LeftWallOffset and RightWallOffset. Open the file and edit Parameters → Data immediately; run Rebuild.FCMacro after changing values. Older personal copies gain missing controls on their next rebuild.
+
 ## First use
 
 1. Install FreeCAD and Qhull's `qconvex` executable. This project was tested with FreeCAD 1.1.3 on Linux. Ensure `qconvex` is on the `PATH` visible to FreeCAD; a sandboxed installation may need extra access. Merely opening the saved models needs no Qhull.
